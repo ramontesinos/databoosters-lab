@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SQL · DataBoosters Lab</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+
+<style>
+/* =========================================================================
+   SISTEMA VISUAL
+   Fondo #050607, acento cian, Space Grotesk para texto y JetBrains Mono
+   para codigo. Sin sombras duras: en un fondo casi negro el volumen viene
+   de superficies mas claras y de una linea de luz de 1px arriba.
+   ========================================================================= */
+:root{
+  /* Medido, no elegido a ojo. El negro anterior (#050607) era neutro y
+     dejaba los paneles a 1.049 de razon contra el fondo: invisibles. Este
+     azul es de la familia del sitio (#040616) y el panel llega a 1.538
+     contando su borde, que es donde de verdad se dibuja una capa en
+     oscuro. Referencia: Material dark sube capas con velo blanco. */
+  --fondo:#070b1c;
+  --sup:#151828;
+  --sup-2:#202333;
+  --linea:rgba(255,255,255,.16);
+  --linea-2:rgba(255,255,255,.26);
+  --tinta:#f4f7fb;
+  --cuerpo:#aab4c6;
+  /* #6b7480 se quedaba en 3.83 contra la superficie clara: por debajo del
+     minimo AA de 4.5. Este pasa en las tres superficies. */
+  --tenue:#909ab0;
+  --cian:#61cdde;
+  --cian-osc:#3fb4c7;
+  --cian-tinta:#04181c;
+  --bien:#5ddba0;
+  --mal:#ff8f80;
+  --aviso:#ffc46b;
+  --lima:#b0fb95;
+  /* Un color por tipo de panel, para que el ojo sepa que esta mirando
+     antes de leer. El texto y el icono siguen ahi: el color acompana,
+     nunca es lo unico que distingue (WCAG 1.4.1). */
+  --ac-reto:var(--lima);
+  --ac-esquema:var(--cian);
+  --ac-pista:var(--aviso);
+  /* misma display que el sitio y que la portada del Lab */
+  --display:'Archivo',Impact,'Helvetica Neue',sans-serif;
+  --sans:'Space Grotesk',-apple-system,'Segoe UI',Helvetica,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --r:12px;
+  --r-s:8px;
+  --luz:inset 0 1px 0 rgba(255,255,255,.05);
+  --sombra:0 12px 34px -14px rgba(0,0,0,.8);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; }
+/* El navegador oculta [hidden] con display:none, pero esa regla es de la
+   hoja del navegador y CUALQUIER display de una clase propia le gana. Sin
+   esta linea, .vistas{display:inline-flex} se seguia viendo aunque el JS
+   pusiera hidden. Vale para todo el documento de una vez. */
+[hidden]{ display:none !important; }
+body{
+  background:var(--fondo);
+  color:var(--cuerpo);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{ margin:0; color:var(--tinta); font-family:var(--display);
+          font-weight:700; letter-spacing:-.03em; text-wrap:balance; }
+/* El titular del ejercicio, con el mismo peso apretado del sitio. */
+#ej-titulo{ font-weight:800 !important; letter-spacing:-.035em !important;
+            line-height:1.02 !important; }
+p{ margin:0; }
+code{
+  font-family:var(--mono); font-size:.88em;
+  background:var(--sup-2); color:var(--cian);
+  border:1px solid var(--linea); border-radius:5px; padding:1px 6px;
+}
+b,strong{ color:var(--tinta); font-weight:600; }
+:focus-visible{ outline:2px solid var(--cian); outline-offset:3px; }
+
+.lab{ max-width:900px; margin:0 auto; padding:26px 22px 40px; }
+
+/* ---------- cabecera ---------- */
+.cab{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:18px; flex-wrap:wrap; margin-bottom:22px;
+}
+.cab-izq{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+.eyebrow{
+  font-family:var(--mono); font-size:11.5px; font-weight:500;
+  letter-spacing:.16em; text-transform:uppercase; color:var(--tenue);
+}
+.cab h1{ font-size:clamp(22px,3.4vw,29px); line-height:1.2; }
+.pasos{ display:flex; gap:6px; align-items:center; flex-shrink:0; }
+.paso{
+  width:40px; height:40px; border-radius:50%;
+  border:1px solid var(--linea-2); background:transparent;
+  color:var(--tenue); font-family:var(--mono); font-size:11.5px;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .16s ease; padding:0;
+}
+.paso:hover{ border-color:var(--tenue); color:var(--tinta); }
+.paso-on{ background:var(--cian); border-color:var(--cian); color:var(--cian-tinta); font-weight:700; }
+.paso-hecho{ border-color:rgba(93,219,160,.5); color:var(--bien); }
+
+/* ---------- tarjetas ---------- */
+.tarjeta{
+  background:var(--sup); border:1px solid var(--linea);
+  border-radius:var(--r); box-shadow:var(--sombra), var(--luz);
+}
+.enunciado{ padding:22px 24px; margin-bottom:14px; }
+.enunciado p{ color:var(--cuerpo); }
+.enunciado .eyebrow{ display:block; margin-bottom:10px; }
+
+/* ---------- desplegables (esquema y pista) ---------- */
+details{
+  background:var(--sup); border:1px solid var(--linea);
+  border-radius:var(--r); margin-bottom:14px; overflow:hidden;
+}
+details[open]{ box-shadow:var(--sombra), var(--luz); }
+summary{
+  cursor:pointer; padding:15px 22px; list-style:none;
+  display:flex; align-items:center; gap:10px;
+  font-size:14.5px; font-weight:500; color:var(--tinta);
+  transition:background .16s ease;
+}
+summary::-webkit-details-marker{ display:none; }
+summary:hover{ background:var(--sup-2); }
+summary .chev{
+  width:14px; height:14px; flex-shrink:0; color:var(--tenue);
+  transition:transform .2s ease;
+}
+details[open] summary .chev{ transform:rotate(90deg); }
+summary .etq{
+  margin-left:auto; font-family:var(--mono); font-size:11px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--tenue);
+}
+.deta-cuerpo{ padding:4px 22px 20px; }
+
+/* ---------- esquema ---------- */
+.tablas{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:12px; }
+.tabla-esq{ border:1px solid var(--linea); border-radius:var(--r-s); overflow:hidden; }
+.tabla-esq h3{
+  font-family:var(--mono); font-size:12.5px; font-weight:500;
+  letter-spacing:.06em; color:var(--cian);
+  padding:10px 13px; background:var(--sup-2); border-bottom:1px solid var(--linea);
+}
+.tabla-esq ul{ margin:0; padding:8px 13px 10px; list-style:none; }
+.tabla-esq li{
+  font-family:var(--mono); font-size:12px; color:var(--cuerpo);
+  padding:2px 0; display:flex; justify-content:space-between; gap:10px;
+}
+.tabla-esq li span{ color:var(--tenue); font-size:11px; }
+
+/* ---------- editor ---------- */
+.editor-caja{
+  background:var(--sup); border:1px solid var(--linea);
+  border-radius:var(--r); overflow:hidden; box-shadow:var(--sombra), var(--luz);
+  margin-bottom:14px;
+}
+.editor-barra{
+  display:flex; align-items:center; gap:10px;
+  padding:11px 16px; border-bottom:1px solid var(--linea); background:var(--sup-2);
+}
+.editor-barra .eyebrow{ font-size:11.5px; }
+.editor-barra .atajo{
+  margin-left:auto; font-family:var(--mono); font-size:11px; color:var(--tenue);
+}
+.editor-barra kbd{
+  font-family:var(--mono); font-size:10.5px; background:var(--fondo);
+  border:1px solid var(--linea-2); border-radius:4px; padding:2px 5px; color:var(--cuerpo);
+}
+.CodeMirror{
+  height:auto; min-height:132px; background:transparent !important;
+  color:var(--tinta); font-family:var(--mono); font-size:14px; line-height:1.7;
+  padding:12px 6px;
+}
+.CodeMirror-gutters{ background:transparent; border-right:1px solid var(--linea); }
+.CodeMirror-linenumber{ color:#3d454e; font-size:12px; }
+.CodeMirror-cursor{ border-left:2px solid var(--cian); }
+.CodeMirror-selected{ background:rgba(97,205,222,.16) !important; }
+.CodeMirror-line::selection,.CodeMirror-line>span::selection{ background:rgba(97,205,222,.24); }
+.cm-s-default .cm-keyword{ color:#7ee0f0; font-weight:500; }
+.cm-s-default .cm-string,.cm-s-default .cm-string-2{ color:#9de6a8; }
+.cm-s-default .cm-number{ color:#ffc46b; }
+.cm-s-default .cm-comment{ color:#5a636d; font-style:italic; }
+.cm-s-default .cm-operator{ color:#c9d1d9; }
+.cm-s-default .cm-variable,.cm-s-default .cm-variable-2{ color:var(--tinta); }
+.cm-s-default .cm-builtin,.cm-s-default .cm-atom{ color:#d7a3ff; }
+
+/* ---------- botones ---------- */
+.acciones{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  font-family:var(--sans); font-size:14.5px; font-weight:600;
+  padding:12px 20px; border-radius:var(--r-s);
+  border:1px solid transparent; cursor:pointer; line-height:1;
+  transition:background .16s ease, border-color .16s ease, transform .12s ease, opacity .16s ease;
+  -webkit-user-select:none; user-select:none;
+}
+.btn:active{ transform:translateY(1px); }
+.btn svg{ width:15px; height:15px; flex-shrink:0; }
+.btn-1{ background:var(--cian); color:var(--cian-tinta); }
+.btn-1:hover:not(:disabled){ background:var(--cian-osc); }
+.btn-2{ background:transparent; color:var(--tinta); border-color:var(--linea-2); }
+.btn-2:hover:not(:disabled){ background:var(--sup-2); border-color:var(--tenue); }
+.btn-3{ background:transparent; color:var(--tenue); padding:12px 12px; }
+.btn-3:hover:not(:disabled){ color:var(--tinta); }
+.btn:disabled{ opacity:.45; cursor:not-allowed; }
+.btn.cargando{ pointer-events:none; }
+.btn.cargando .txt{ opacity:.55; }
+
+/* girito del boton mientras ejecuta */
+@keyframes gira{ to{ transform:rotate(360deg); } }
+.aro{
+  width:14px; height:14px; border-radius:50%; flex-shrink:0;
+  border:2px solid currentColor; border-top-color:transparent;
+  animation:gira .7s linear infinite;
+}
+
+/* ---------- avisos ---------- */
+.aviso{
+  display:flex; gap:13px; align-items:flex-start;
+  padding:16px 18px; border-radius:var(--r); margin-bottom:14px;
+  border:1px solid var(--linea-2); background:var(--sup);
+  font-size:14.5px; animation:entra .25s ease;
+}
+@keyframes entra{ from{ opacity:0; transform:translateY(-4px); } to{ opacity:1; transform:none; } }
+.aviso svg{ width:18px; height:18px; flex-shrink:0; margin-top:1px; }
+.aviso-bien{ border-color:rgba(93,219,160,.45); background:rgba(93,219,160,.07); }
+.aviso-bien svg{ color:var(--bien); }
+.aviso-bien b{ color:var(--bien); }
+.aviso-mal{ border-color:rgba(255,143,128,.4); background:rgba(255,143,128,.06); }
+.aviso-mal svg{ color:var(--mal); }
+.aviso-mal b{ color:var(--mal); }
+.aviso-info{ border-color:rgba(255,196,107,.4); background:rgba(255,196,107,.06); }
+.aviso-info svg{ color:var(--aviso); }
+.aviso-info b{ color:var(--aviso); }
+.aviso-cuerpo{ min-width:0; }
+.aviso-cuerpo p+p{ margin-top:6px; }
+.aviso .comparativa{
+  margin-top:10px; font-family:var(--mono); font-size:12.5px;
+  display:flex; flex-direction:column; gap:5px;
+}
+.aviso .comparativa div{ display:flex; gap:9px; align-items:baseline; }
+.aviso .comparativa em{
+  font-style:normal; color:var(--tenue); font-size:11px;
+  letter-spacing:.08em; text-transform:uppercase; flex-shrink:0; min-width:66px;
+}
+.aviso .comparativa code{ background:var(--fondo); color:var(--tinta); }
+
+/* ---------- resultados ---------- */
+.res-cab{
+  display:flex; align-items:baseline; gap:12px; flex-wrap:wrap;
+  margin:2px 0 12px;
+}
+.res-cab .eyebrow{ margin-right:auto; }
+.res-cuenta{ font-family:var(--mono); font-size:12px; color:var(--tenue); }
+.tabla-envoltura{
+  border:1px solid var(--linea); border-radius:var(--r);
+  overflow-x:auto; background:var(--sup); box-shadow:var(--luz);
+}
+table{ border-collapse:collapse; width:100%; min-width:max-content; }
+th,td{
+  text-align:left; padding:11px 16px; white-space:nowrap;
+  border-bottom:1px solid var(--linea); font-size:13.5px;
+}
+th{
+  font-family:var(--mono); font-size:11.5px; font-weight:500;
+  letter-spacing:.08em; text-transform:uppercase;
+  color:var(--cian); background:var(--sup-2); position:sticky; top:0;
+}
+td{ font-family:var(--mono); color:var(--cuerpo); }
+tbody tr:last-child td{ border-bottom:none; }
+tbody tr:hover td{ background:rgba(255,255,255,.02); }
+td.num{ text-align:right; font-variant-numeric:tabular-nums; color:var(--tinta); }
+td.nulo{ color:#4a525b; font-style:italic; }
+.vacio{ padding:34px 20px; text-align:center; color:var(--tenue); font-size:14.5px; }
+
+/* ---------- pantalla de carga, con la identidad ---------- */
+.arranque{
+  position:fixed; inset:0; background:var(--fondo);
+  display:flex; align-items:center; justify-content:center;
+  z-index:50; transition:opacity .35s ease;
+}
+.arranque.fuera{ opacity:0; pointer-events:none; }
+.arranque-caja{ display:flex; flex-direction:column; align-items:center; gap:22px; padding:24px; }
+.marca{
+  font-family:var(--mono); font-size:12px; letter-spacing:.22em;
+  text-transform:uppercase; color:var(--tenue);
+}
+.arranque h2{ font-size:20px; font-weight:600; text-align:center; }
+.barra{
+  width:210px; height:3px; border-radius:2px;
+  background:rgba(255,255,255,.07); overflow:hidden;
+}
+.barra i{
+  display:block; height:100%; width:34%; border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--cian),transparent);
+  animation:corre 1.25s ease-in-out infinite;
+}
+@keyframes corre{
+  0%{ transform:translateX(-110%); } 100%{ transform:translateX(400%); }
+}
+.arranque .paso-txt{
+  font-family:var(--mono); font-size:12px; color:var(--tenue);
+  min-height:18px; text-align:center;
+}
+
+/* ---------- movil ---------- */
+@media(max-width:640px){
+  .lab{ padding:20px 16px 32px; }
+  .acciones{ flex-direction:column; align-items:stretch; }
+  .btn{ width:100%; }
+  .btn-3{ width:auto; align-self:center; }
+  .cab{ flex-direction:column; gap:12px; }
+  .tablas{ grid-template-columns:1fr; }
+  .CodeMirror{ font-size:13.5px; min-height:118px; }
+  th,td{ padding:10px 13px; font-size:12.5px; }
+}
+@media(prefers-reduced-motion:reduce){
+  *{ animation:none !important; transition:none !important; }
+}
+
+/* =========================================================================
+   AGREGADO - barra superior, filtro de temas, progreso y vista grafica
+   ========================================================================= */
+
+/* --- barra superior: vuelta al hub + progreso ---------------------------- */
+.barra-sup{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; margin-bottom:26px;
+  padding-bottom:18px; border-bottom:1px solid var(--linea);
+}
+.volver{
+  display:inline-flex; align-items:center; gap:9px;
+  color:var(--cuerpo); text-decoration:none;
+  font-size:14px; font-weight:500; letter-spacing:-.01em;
+  padding:8px 10px 8px 6px; margin:-8px 0 -8px -6px; border-radius:var(--r-s);
+  min-height:40px;
+}
+.volver:hover{ color:var(--tinta); background:var(--sup); }
+.volver:focus-visible{ outline:2px solid var(--cian); outline-offset:2px; }
+.volver svg{ width:16px; height:16px; flex:none; color:var(--cian); }
+.volver b{ color:var(--tinta); font-weight:600; }
+.progreso{
+  font-family:var(--mono); font-size:12px; color:var(--tenue);
+  display:inline-flex; align-items:center; gap:12px; flex-wrap:wrap;
+}
+.progreso .pip{ display:inline-flex; gap:4px; }
+.progreso .pip i{
+  width:7px; height:7px; border-radius:50%; display:block;
+  background:var(--linea-2);
+}
+.progreso .pip i.on{ background:var(--cian); }
+.borrar-prog{
+  background:none; border:0; padding:6px 8px; margin:-6px -8px;
+  color:var(--tenue); font-family:var(--sans); font-size:12px;
+  text-decoration:underline; text-underline-offset:3px; cursor:pointer;
+  border-radius:6px; min-height:36px;
+}
+.borrar-prog:hover{ color:var(--mal); }
+.borrar-prog:focus-visible{ outline:2px solid var(--cian); outline-offset:2px; }
+
+/* --- filtro de temas ----------------------------------------------------- */
+.temas{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 18px; }
+.tema{
+  font-family:var(--sans); font-size:13px; font-weight:500;
+  letter-spacing:-.01em; cursor:pointer;
+  min-height:40px; padding:9px 15px; border-radius:999px;
+  background:var(--sup); color:var(--cuerpo);
+  border:1px solid var(--linea);
+  display:inline-flex; align-items:center; gap:7px;
+}
+.tema:hover{ background:var(--sup-2); color:var(--tinta); border-color:var(--linea-2); }
+.tema:focus-visible{ outline:2px solid var(--cian); outline-offset:2px; }
+.tema-on{
+  background:var(--cian); border-color:var(--cian); color:var(--cian-tinta);
+  font-weight:600;
+}
+.tema-on:hover{ background:var(--cian); color:var(--cian-tinta); }
+.tema .n{ font-family:var(--mono); font-size:11px; opacity:.7; }
+
+/* --- selector de vista del resultado ------------------------------------ */
+.res-der{ display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+.vistas{
+  display:inline-flex; padding:3px; gap:3px;
+  background:var(--sup); border:1px solid var(--linea); border-radius:999px;
+}
+.vista{
+  font-family:var(--sans); font-size:12.5px; font-weight:500; cursor:pointer;
+  min-height:34px; padding:6px 14px; border-radius:999px;
+  background:none; border:0; color:var(--tenue);
+  display:inline-flex; align-items:center; gap:6px;
+}
+.vista svg{ width:14px; height:14px; flex:none; }
+.vista:hover{ color:var(--tinta); }
+.vista:focus-visible{ outline:2px solid var(--cian); outline-offset:2px; }
+.vista-on{ background:var(--sup-2); color:var(--tinta); box-shadow:var(--luz); }
+.vista-on svg{ color:var(--cian); }
+
+/* --- KPI ---------------------------------------------------------------- */
+.kpis{
+  display:grid; gap:12px;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+}
+.kpi{
+  background:var(--sup); border:1px solid var(--linea); border-radius:var(--r);
+  box-shadow:var(--luz); padding:22px 22px 20px;
+}
+.kpi .et{
+  display:block; font-family:var(--mono); font-size:11px;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--tenue);
+  margin-bottom:12px; word-break:break-word;
+}
+.kpi .val{
+  display:block; font-size:clamp(30px,5vw,42px); line-height:1.05;
+  font-weight:700; letter-spacing:-.03em; color:var(--tinta);
+  font-variant-numeric:tabular-nums;
+}
+.kpi .val.es-nulo{ color:var(--tenue); font-size:24px; font-weight:500; }
+
+/* --- barras en HTML, no en SVG: asi el texto no se desborda nunca ------- */
+.barras{
+  background:var(--sup); border:1px solid var(--linea); border-radius:var(--r);
+  box-shadow:var(--luz); padding:20px 22px;
+}
+.barras-cab{
+  font-family:var(--mono); font-size:11px; letter-spacing:.09em;
+  text-transform:uppercase; color:var(--tenue);
+  margin-bottom:18px; display:block;
+}
+.barra-f{
+  display:grid; grid-template-columns:minmax(0,7.5rem) 1fr auto;
+  align-items:center; gap:14px; padding:5px 0;
+}
+.barra-f .lb{
+  font-size:13px; color:var(--cuerpo); text-align:right;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.barra-f .pista-b{
+  height:22px; border-radius:5px; background:var(--sup-2);
+  overflow:hidden; min-width:2px;
+}
+.barra-f .rel{
+  display:block; height:100%; border-radius:5px; min-width:2px;
+  background:linear-gradient(90deg,var(--cian-osc),var(--cian));
+}
+.barra-f .vl{
+  font-family:var(--mono); font-size:12.5px; color:var(--tinta);
+  font-variant-numeric:tabular-nums; white-space:nowrap;
+}
+.barra-f .vl.neg{ color:var(--mal); }
+.barras-pie{
+  margin-top:16px; padding-top:14px; border-top:1px solid var(--linea);
+  font-size:12.5px; color:var(--tenue);
+}
+
+/* En movil la etiqueta pasa arriba de la barra: a 390 px una columna de
+   7.5rem para el nombre de la ciudad deja la barra en nada. */
+@media (max-width:560px){
+  /* En pantalla tactil los objetivos crecen: 32 px de circulo se fallan
+     con el pulgar. 6 circulos de 40 px con sus huecos caben en 390 px. */
+  .paso{ width:40px; height:40px; font-size:13px; }
+  .vista{ min-height:40px; padding:8px 15px; }
+  .barra-f{ grid-template-columns:1fr; gap:5px; padding:9px 0; }
+  .barra-f .lb{ text-align:left; }
+  .barra-f .vl{ font-size:12px; }
+  .barras{ padding:16px; }
+  .kpi{ padding:18px; }
+  .barra-sup{ margin-bottom:20px; }
+}
+
+/* =========================================================================
+   AGREGADO 2 - identidad por panel, tablas legibles y explicacion
+   ========================================================================= */
+
+/* --- una franja de color a la izquierda por tipo de panel --------------- */
+.enunciado, #det-esquema, #det-pista{
+  border-left:3px solid var(--linea-2) !important;
+}
+.enunciado{ border-left-color:var(--ac-reto) !important; }
+#det-esquema{ border-left-color:var(--ac-esquema) !important; }
+#det-pista{ border-left-color:var(--ac-pista) !important; }
+
+.enunciado .eyebrow{ color:var(--ac-reto); }
+#det-esquema > summary .chev{ color:var(--ac-esquema); }
+#det-pista > summary .chev{ color:var(--ac-pista); }
+#det-esquema > summary .etq{
+  border-color:rgba(97,205,222,.35); color:var(--cian);
+}
+#det-pista > summary .etq{
+  border-color:rgba(255,196,107,.32); color:var(--aviso);
+}
+
+/* --- tabla de resultados: que se lea fila por fila ---------------------- */
+/* El problema no era el borde de la tabla sino que todas las filas tenian
+   el mismo fondo. Con 12 filas el ojo pierde el renglon. */
+.tabla-envoltura thead th{
+  background:var(--sup-2) !important;
+  color:var(--tinta) !important;
+  border-bottom:2px solid var(--linea-2) !important;
+  position:sticky; top:0; z-index:1;
+}
+.tabla-envoltura tbody tr:nth-child(even){
+  background:rgba(255,255,255,.055);
+}
+.tabla-envoltura tbody tr:hover{
+  background:rgba(97,205,222,.09);
+}
+.tabla-envoltura tbody td{
+  border-bottom:1px solid rgba(255,255,255,.09) !important;
+}
+.tabla-envoltura tbody tr:last-child td{ border-bottom:0 !important; }
+/* La columna numerica se alinea a la derecha y va en cifra tabular: asi
+   las unidades quedan una debajo de otra y se comparan de un vistazo. */
+.tabla-envoltura td.num{
+  text-align:right; font-variant-numeric:tabular-nums; color:var(--tinta);
+}
+.tabla-envoltura td.nulo{ color:var(--tenue); font-style:italic; }
+
+/* --- que hizo tu consulta ---------------------------------------------- */
+#det-explica{
+  background:var(--sup); border:1px solid var(--linea);
+  border-left:3px solid var(--ac-esquema);
+  border-radius:var(--r-s); box-shadow:var(--luz);
+  margin-bottom:14px;
+}
+#det-explica > summary{
+  display:flex; align-items:center; gap:10px; cursor:pointer;
+  padding:13px 16px; list-style:none;
+  font-size:13.5px; font-weight:600; color:var(--tinta);
+  letter-spacing:-.01em; min-height:44px;
+}
+#det-explica > summary::-webkit-details-marker{ display:none; }
+#det-explica > summary:focus-visible{ outline:2px solid var(--cian); outline-offset:-2px; }
+#det-explica > summary .chev{
+  width:15px; height:15px; flex:none; color:var(--ac-esquema);
+  transition:transform .16s ease;
+}
+#det-explica[open] > summary .chev{ transform:rotate(90deg); }
+#det-explica > summary .colapso{
+  margin-left:auto; font-family:var(--mono); font-size:11px;
+  font-weight:400; color:var(--tenue);
+}
+.explica-cuerpo{ padding:0 16px 16px; }
+
+.paso-sql{
+  display:grid; grid-template-columns:auto 1fr; gap:12px;
+  padding:9px 0; align-items:start;
+}
+.paso-sql + .paso-sql{ border-top:1px solid rgba(255,255,255,.05); }
+.paso-sql .cl{
+  font-family:var(--mono); font-size:10px; font-weight:700;
+  letter-spacing:.06em; color:var(--cian);
+  background:rgba(97,205,222,.12); border:1px solid rgba(97,205,222,.28);
+  border-radius:5px; padding:3px 7px; white-space:nowrap; margin-top:1px;
+}
+.paso-sql .tx{ font-size:14px; color:var(--cuerpo); line-height:1.55;
+               font-family:var(--sans); }
+.paso-sql .tx b{ color:var(--tinta); font-weight:600; }
+.paso-sql .tx code{ font-size:.85em; }
+
+.explica-salida{
+  margin-top:12px; padding-top:12px; border-top:1px solid var(--linea);
+  font-size:13.5px; color:var(--cuerpo);
+}
+.explica-salida b{ color:var(--cian); font-weight:600; }
+.explica-nota{
+  margin-top:12px; padding:11px 13px;
+  background:rgba(255,196,107,.07); border:1px solid rgba(255,196,107,.2);
+  border-radius:var(--r-s);
+  font-size:12.5px; color:var(--cuerpo); line-height:1.5;
+}
+.explica-nota b{ color:var(--aviso); font-weight:600; }
+
+@media (max-width:560px){
+  .paso-sql{ grid-template-columns:1fr; gap:5px; }
+  .paso-sql .cl{ justify-self:start; }
+}
+
+/* =========================================================================
+   AGREGADO 3 - el bloque que ENSENA antes del reto
+   ========================================================================= */
+#aprende{
+  background:var(--sup); border:1px solid var(--linea);
+  border-left:3px solid var(--cian);
+  border-radius:var(--r); box-shadow:var(--luz);
+  padding:24px 26px; margin-bottom:16px;
+}
+#aprende .eyebrow{ color:var(--cian); }
+#aprende h2{
+  font-size:19px; letter-spacing:-.025em; margin:10px 0 12px; line-height:1.3;
+}
+#aprende .cuerpo{ font-size:14.5px; color:var(--cuerpo); line-height:1.65; }
+#aprende .cuerpo b{ color:var(--tinta); font-weight:600; }
+
+.bloque-sql{ margin-top:18px; }
+.bloque-sql > .rot{
+  display:block; font-family:var(--mono); font-size:10.5px;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--tenue);
+  margin-bottom:7px;
+}
+.bloque-sql pre{
+  margin:0; padding:14px 16px; overflow-x:auto;
+  background:var(--fondo); border:1px solid var(--linea);
+  border-radius:var(--r-s);
+  font-family:var(--mono); font-size:13px; line-height:1.6; color:var(--tinta);
+  white-space:pre;
+}
+.bloque-sql.sintaxis pre{ color:var(--tenue); }
+/* La sintaxis es una plantilla, no codigo real: se distingue del ejemplo
+   con un borde punteado para que nadie intente ejecutarla tal cual. */
+.bloque-sql.sintaxis pre{ border-style:dashed; }
+
+.ej-pie{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; flex-wrap:wrap; margin-top:11px;
+}
+.ej-pie .dice{ font-size:13.5px; color:var(--cuerpo); flex:1 1 240px; }
+.ej-pie .dice::before{ content:"→ "; color:var(--cian); }
+.btn-probar{
+  font-family:var(--sans); font-size:13px; font-weight:600; cursor:pointer;
+  min-height:40px; padding:9px 16px; border-radius:var(--r-s);
+  background:rgba(97,205,222,.12); color:var(--cian);
+  border:1px solid rgba(97,205,222,.4);
+  display:inline-flex; align-items:center; gap:8px; white-space:nowrap;
+}
+.btn-probar:hover{ background:rgba(97,205,222,.2); border-color:var(--cian); }
+.btn-probar:focus-visible{ outline:2px solid var(--cian); outline-offset:2px; }
+.btn-probar svg{ width:14px; height:14px; flex:none; }
+
+/* Separador claro entre lo que se ensena y lo que se pide. */
+.enunciado{ margin-top:0 !important; }
+.enunciado .eyebrow::after{
+  content:" · ahora te toca a ti";
+  color:var(--tenue); font-weight:400; letter-spacing:.06em;
+}
+
+@media (max-width:560px){
+  /* En mayusculas y con tracking, por debajo de 11.5 px se vuelve
+     ilegible en pantalla chica. */
+  .bloque-sql > .rot{ font-size:11.5px; }
+  #aprende{ padding:20px; }
+  #aprende h2{ font-size:17px; }
+  .bloque-sql pre{ font-size:12px; padding:12px; }
+  .btn-probar{ width:100%; justify-content:center; }
+  .enunciado .eyebrow::after{ content:""; }
+}
+</style>
+</head>
+<body>
+
+<!-- pantalla de arranque, con tu identidad y no un spinner genérico -->
+<div class="arranque" id="arranque" role="status" aria-live="polite">
+  <div class="arranque-caja">
+    <span class="marca">DataBoosters</span>
+    <h2>Preparando el laboratorio</h2>
+    <div class="barra"><i></i></div>
+    <p class="paso-txt" id="arranque-paso">Cargando el motor de SQL…</p>
+  </div>
+</div>
+
+<main class="lab" id="lab" hidden>
+
+  <div class="barra-sup">
+    <a class="volver" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      <b>DataBoosters Lab</b> &middot; SQL
+    </a>
+    <span class="progreso" id="progreso"></span>
+  </div>
+
+  <div class="temas" id="temas" role="group" aria-label="Filtrar ejercicios por tema"></div>
+
+  <div class="cab">
+    <div class="cab-izq">
+      <span class="eyebrow" id="ej-etiqueta">Ejercicio</span>
+      <h1 id="ej-titulo">—</h1>
+    </div>
+    <div class="pasos" id="pasos" role="group" aria-label="Ejercicios"></div>
+  </div>
+
+  <!-- Primero se explica, luego se practica. Antes se caia directo al
+       reto y el alumno tenia que adivinar de que iba. -->
+  <section class="tarjeta" id="aprende" hidden>
+    <span class="eyebrow">Aprende</span>
+    <h2 id="ap-titulo"></h2>
+    <div class="cuerpo" id="ap-texto"></div>
+    <div class="bloque-sql sintaxis" id="ap-sintaxis-caja">
+      <span class="rot">Cómo se escribe</span>
+      <pre id="ap-sintaxis"></pre>
+    </div>
+    <div class="bloque-sql" id="ap-ejemplo-caja">
+      <span class="rot">Ejemplo con datos reales</span>
+      <pre id="ap-ejemplo"></pre>
+      <div class="ej-pie">
+        <span class="dice" id="ap-dice"></span>
+        <button class="btn-probar" id="btn-probar" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M8 5.5v13l11-6.5z"/></svg>
+          Probar este ejemplo
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="tarjeta enunciado">
+    <span class="eyebrow">El reto</span>
+    <p id="ej-enunciado">—</p>
+  </section>
+
+  <details id="det-esquema">
+    <summary>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      Esquema de la base de datos
+      <span class="etq" id="esquema-nombre"></span>
+    </summary>
+    <div class="deta-cuerpo">
+      <div class="tablas" id="esquema"></div>
+    </div>
+  </details>
+
+  <details id="det-pista">
+    <summary>
+      <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      Ver una pista
+      <span class="etq">Si te atoras</span>
+    </summary>
+    <div class="deta-cuerpo"><p id="ej-pista">—</p></div>
+  </details>
+
+  <div class="editor-caja">
+    <div class="editor-barra">
+      <span class="eyebrow">Tu consulta</span>
+      <span class="atajo"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> ejecuta</span>
+    </div>
+    <textarea id="editor" aria-label="Editor de SQL"></textarea>
+  </div>
+
+  <div class="acciones">
+    <button class="btn btn-1" id="btn-ejecutar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 5.5v13l11-6.5z"/></svg>
+      <span class="txt">Ejecutar</span>
+    </button>
+    <button class="btn btn-2" id="btn-verificar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20 6 9 17l-5-5"/></svg>
+      <span class="txt">Verificar respuesta</span>
+    </button>
+    <button class="btn btn-3" id="btn-reiniciar">Reiniciar</button>
+    <button class="btn btn-3" id="btn-solucion">Ver solución</button>
+  </div>
+
+  <div id="avisos"></div>
+
+  <div id="zona-resultado" hidden>
+    <div class="res-cab">
+      <span class="eyebrow">Resultado</span>
+      <div class="res-der">
+        <span class="res-cuenta" id="res-cuenta"></span>
+        <!-- Solo aparece cuando el resultado admite grafica. Un boton de
+             "Grafica" desactivado sobre una tabla de 300 filas es ruido. -->
+        <div class="vistas" id="vistas" hidden role="group" aria-label="Forma de ver el resultado">
+          <button class="vista vista-on" id="vista-tabla" data-vista="tabla">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" aria-hidden="true">
+              <path d="M3 5h18M3 12h18M3 19h18M9 5v14"/></svg>Tabla</button>
+          <button class="vista" id="vista-grafica" data-vista="grafica">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" aria-hidden="true">
+              <path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Gr&aacute;fica</button>
+        </div>
+      </div>
+    </div>
+    <!-- Abierto por defecto: la idea es que SIEMPRE se explique. Se puede
+         cerrar para quien ya no lo necesita, y se recuerda la eleccion. -->
+    <details id="det-explica" open hidden>
+      <summary>
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+        Qué hizo tu consulta
+        <span class="colapso">paso a paso</span>
+      </summary>
+      <div class="explica-cuerpo" id="explica-cuerpo"></div>
+    </details>
+
+    <div class="tabla-envoltura" id="tabla-envoltura"></div>
+    <div id="grafica-envoltura" hidden></div>
+  </div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+<script src="ejercicios.js"></script>
+<script src="motor.js"></script>
+</body>
+</html>

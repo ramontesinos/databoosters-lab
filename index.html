@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DataBoosters Lab</title>
+<meta name="description" content="Laboratorios de práctica de DataBoosters: escribe consultas y código de verdad en tu navegador, sin instalar nada.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Archivo es la display del sitio (inicio, cupones, catalogo). Se trae
+     aqui para que el Lab no parezca de otra casa. -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* =========================================================================
+   DATABOOSTERS LAB · portada
+   Mismo lenguaje visual que inicio / cupones / catalogo: Archivo en bold
+   apretado, cejilla en monoespaciada y el marcador solido sobre una parte
+   del titular. La unica diferencia a proposito es que aqui el marcador va
+   en CIAN, no en lima: el Lab es la zona cian de la marca.
+   ========================================================================= */
+:root{
+  --fondo:#070b1c;
+  --sup:#151828;
+  --sup-2:#202333;
+  --linea:rgba(255,255,255,.16);
+  --linea-2:rgba(255,255,255,.26);
+  --tinta:#f4f7fb;
+  --cuerpo:#aab4c6;
+  --tenue:#909ab0;
+  --cian:#61cdde;
+  --cian-osc:#3fb4c7;
+  --cian-tinta:#04181c;
+  --lima:#b0fb95;
+  /* mismas familias que _sistema/02-estilos-globales.txt */
+  --display:'Archivo',Impact,'Helvetica Neue',sans-serif;
+  --sans:'Space Grotesk',-apple-system,'Segoe UI',Helvetica,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  --r:14px;
+  --r-s:8px;
+  --luz:inset 0 1px 0 rgba(255,255,255,.05);
+  --sombra:0 12px 34px -14px rgba(0,0,0,.8);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+[hidden]{ display:none !important; }
+html,body{ margin:0; padding:0; }
+body{
+  background:var(--fondo);
+  color:var(--cuerpo);
+  font-family:var(--sans);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+p{ margin:0; }
+a{ color:inherit; }
+
+/* ---------- TIPOGRAFIA (copiada del sistema del sitio) ---------- */
+h1,h2,h3{
+  margin:0;
+  font-family:var(--display);
+  color:var(--tinta);
+  text-wrap:balance;
+}
+/* La escala va en PIXELES a proposito, igual que en el sitio. */
+.tit{
+  font-size:clamp(38px,6.4vw,78px);
+  font-weight:800;
+  line-height:.99;
+  letter-spacing:-.035em;
+  margin-bottom:22px;
+  max-width:17ch;
+}
+/* El marcador: bloque solido con texto oscuro encima. En el sitio es lima;
+   aqui es cian porque el Lab es la zona cian de la marca. Se usa UNA VEZ
+   por pantalla: es lo que mas contrasta de toda la pagina.
+   box-decoration-break:clone hace que al partirse en dos renglones cada
+   uno lleve su propio relleno, en vez de quedar uno cortado. */
+.marcador{
+  background:var(--cian);
+  color:var(--cian-tinta);
+  padding:0 .1em;
+  -webkit-box-decoration-break:clone;
+  box-decoration-break:clone;
+}
+.eyebrow{
+  font-family:var(--mono);
+  font-size:12.5px;
+  font-weight:500;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--tenue);
+  display:block;
+}
+.lede{
+  font-size:clamp(17px,1.7vw,20px);
+  color:var(--cuerpo);
+  max-width:58ch;
+  margin-bottom:16px;
+}
+@media(max-width:620px){
+  /* En telefono el texto chico SUBE, no baja. */
+  .eyebrow{ font-size:13px; letter-spacing:.12em; }
+}
+
+.hub{ max-width:1080px; margin:0 auto; padding:64px 24px 80px; }
+
+/* ---------- marca ---------- */
+.marca{
+  display:inline-flex; align-items:center; gap:10px;
+  font-family:var(--mono); font-size:12.5px; font-weight:500;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--tenue);
+  margin-bottom:38px;
+}
+.marca .punto{ width:8px; height:8px; border-radius:50%; background:var(--cian); flex:none; }
+.marca b{ color:var(--tinta); font-weight:700; }
+
+.sin-instalar{
+  display:inline-flex; align-items:center; gap:9px;
+  font-family:var(--mono); font-size:12px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--tenue);
+  border:1px solid var(--linea); border-radius:999px;
+  padding:8px 15px; margin-bottom:52px; min-height:40px;
+}
+.sin-instalar svg{ width:14px; height:14px; flex:none; color:var(--lima); }
+
+/* ---------- tarjetas ---------- */
+.pistas{
+  display:grid; gap:18px;
+  grid-template-columns:repeat(auto-fit,minmax(310px,1fr));
+  margin-bottom:64px;
+}
+/* La tarjeta activa es un <a>: todo el bloque es clicable, un solo destino,
+   sin botones falsos dentro. La de "en camino" es un <div>, porque un
+   enlace que no lleva a ningun lado es peor que ningun enlace. */
+.pista{
+  display:flex; flex-direction:column;
+  background:var(--sup); border:1px solid var(--linea);
+  border-radius:var(--r); box-shadow:var(--luz);
+  padding:28px; text-decoration:none; position:relative;
+  transition:border-color .16s ease, transform .16s ease, background .16s ease;
+}
+.pista-viva:hover{ border-color:var(--cian); background:var(--sup-2); transform:translateY(-2px); }
+.pista-viva:focus-visible{ outline:2px solid var(--cian); outline-offset:3px; }
+.pista-pronto{ opacity:.6; }
+
+.pista-cab{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:22px; }
+.logo{
+  width:46px; height:46px; border-radius:12px; flex:none;
+  display:grid; place-items:center;
+  background:var(--sup-2); border:1px solid var(--linea);
+  font-family:var(--mono); font-size:14px; font-weight:700; letter-spacing:-.02em;
+}
+.pista-viva .logo{ color:var(--cian); border-color:rgba(97,205,222,.4); }
+.pista-pronto .logo{ color:var(--tenue); }
+
+.etq{
+  font-family:var(--mono); font-size:11px; font-weight:500;
+  letter-spacing:.1em; text-transform:uppercase;
+  padding:6px 11px; border-radius:999px; white-space:nowrap;
+}
+.etq-viva{ background:var(--cian); color:var(--cian-tinta); font-weight:700; }
+.etq-pronto{ background:var(--sup-2); color:var(--tenue); border:1px solid var(--linea); }
+
+.pista h2{
+  font-size:26px; font-weight:700; line-height:1.08;
+  letter-spacing:-.03em; margin-bottom:11px;
+}
+.pista p{ font-size:15px; margin-bottom:22px; }
+
+/* Pastillas en monoespaciada y mayusculas, como los filtros del catalogo. */
+.temario{ list-style:none; margin:0 0 24px; padding:0; display:flex; flex-wrap:wrap; gap:7px; }
+.temario li{
+  font-family:var(--mono); font-size:11px; font-weight:500;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--cuerpo);
+  background:transparent; border:1px solid var(--linea);
+  border-radius:999px; padding:6px 12px;
+}
+.pista-viva .temario li{ color:var(--tinta); border-color:var(--linea-2); }
+
+.pista-pie{
+  margin-top:auto; padding-top:20px; border-top:1px solid var(--linea);
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  font-family:var(--display); font-size:16px; font-weight:700;
+  color:var(--tinta); letter-spacing:-.02em; min-height:40px;
+}
+.pista-pronto .pista-pie{ color:var(--tenue); font-weight:600; }
+.pista-pie svg{ width:18px; height:18px; flex:none; color:var(--cian); transition:transform .16s ease; }
+.pista-viva:hover .pista-pie svg{ transform:translateX(4px); }
+
+/* ---------- como funciona ---------- */
+.comof{ border-top:1px solid var(--linea); padding-top:44px; }
+.comof > .eyebrow{ margin-bottom:30px; }
+.pasos3{ display:grid; gap:30px; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+.p3 .n{
+  display:inline-grid; place-items:center;
+  width:30px; height:30px; border-radius:9px; margin-bottom:16px;
+  background:var(--sup-2); border:1px solid var(--linea);
+  font-family:var(--mono); font-size:12px; font-weight:700; color:var(--cian);
+}
+.p3 h3{ font-size:18px; font-weight:700; letter-spacing:-.02em; margin-bottom:8px; }
+.p3 p{ font-size:14.5px; }
+
+/* ---------- pie ---------- */
+.pie{
+  margin-top:60px; padding-top:28px; border-top:1px solid var(--linea);
+  display:flex; align-items:center; justify-content:space-between;
+  gap:16px; flex-wrap:wrap; font-size:13px; color:var(--tenue);
+}
+.pie a{
+  color:var(--cuerpo); text-decoration:none;
+  border-bottom:1px solid var(--linea-2); padding-bottom:1px;
+  display:inline-block; min-height:24px;
+}
+.pie a:hover{ color:var(--cian); border-color:var(--cian); }
+.pie a:focus-visible{ outline:2px solid var(--cian); outline-offset:3px; }
+
+@media (max-width:560px){
+  .hub{ padding:40px 18px 56px; }
+  .marca{ margin-bottom:28px; }
+  .sin-instalar{ margin-bottom:36px; }
+  .pista{ padding:24px; }
+  .pistas{ gap:14px; margin-bottom:48px; }
+  .tit{ max-width:none; }
+  .pista h2{ font-size:23px; }
+}
+
+/* Respeta a quien pidio menos movimiento en su sistema. */
+@media (prefers-reduced-motion:reduce){
+  .pista, .pista-pie svg{ transition:none; }
+  .pista-viva:hover{ transform:none; }
+  .pista-viva:hover .pista-pie svg{ transform:none; }
+}
+</style>
+</head>
+<body>
+
+<main class="hub">
+
+  <span class="marca"><span class="punto" aria-hidden="true"></span><b>DataBoosters</b> Lab</span>
+
+  <span class="eyebrow">Laboratorios de práctica</span>
+  <h1 class="tit">Practica escribiendo, <span class="marcador">no viendo videos.</span></h1>
+  <p class="lede">
+    Datos de verdad para que escribas consultas y código en tu navegador.
+    Cada ejercicio se corrige al instante y te dice <b>qué</b> falló, no solo
+    que falló.
+  </p>
+  <p class="sin-instalar">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+    Sin instalar nada · Sin cuenta · Gratis
+  </p>
+
+  <div class="pistas">
+
+    <a class="pista pista-viva" href="sql.html">
+      <div class="pista-cab">
+        <span class="logo" aria-hidden="true">SQL</span>
+        <span class="etq etq-viva">Disponible</span>
+      </div>
+      <h2>Laboratorio de SQL</h2>
+      <p>
+        Una base SQLite real dentro de tu navegador. Consulta la tienda
+        TiendaMX y ve el resultado como tabla, indicador o gráfica de barras.
+      </p>
+      <ul class="temario">
+        <li>Select</li><li>Where</li><li>Order by</li><li>Group by</li><li>Join</li>
+      </ul>
+      <span class="pista-pie">
+        Entrar al laboratorio
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h13M13 6l6 6-6 6"/></svg>
+      </span>
+    </a>
+
+    <div class="pista pista-pronto">
+      <div class="pista-cab">
+        <span class="logo" aria-hidden="true">PY</span>
+        <span class="etq etq-pronto">En camino</span>
+      </div>
+      <h2>Laboratorio de Python</h2>
+      <p>
+        Lo mismo pero con pandas: limpiar una tabla, agrupar, calcular y
+        graficar, sin instalar Python en tu máquina.
+      </p>
+      <ul class="temario">
+        <li>Listas</li><li>Pandas</li><li>Groupby</li><li>Merge</li><li>Gráficas</li>
+      </ul>
+      <span class="pista-pie">Todavía no está listo</span>
+    </div>
+
+  </div>
+
+  <section class="comof">
+    <span class="eyebrow">Cómo funciona</span>
+    <div class="pasos3">
+      <div class="p3">
+        <span class="n" aria-hidden="true">1</span>
+        <h3>Primero se explica</h3>
+        <p>Qué es, cómo se escribe y un ejemplo con datos reales que puedes ejecutar de un clic antes de que te toque a ti.</p>
+      </div>
+      <div class="p3">
+        <span class="n" aria-hidden="true">2</span>
+        <h3>Luego escribes tú</h3>
+        <p>Editor con resaltado de sintaxis. <b>Ctrl + Enter</b> ejecuta. Te equivocas todas las veces que quieras.</p>
+      </div>
+      <div class="p3">
+        <span class="n" aria-hidden="true">3</span>
+        <h3>Y te corrige de verdad</h3>
+        <p>No compara texto: ejecuta tu consulta y la solución, y te dice en qué fila y columna difieren.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer class="pie">
+    <span>DataBoosters Lab · práctica gratis</span>
+    <span><a href="https://cursos.databoosters.mx/catalogo">Ver todos los cursos</a></span>
+  </footer>
+
+</main>
+
+</body>
+</html>
