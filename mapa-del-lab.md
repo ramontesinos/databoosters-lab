@@ -163,3 +163,11 @@ Mi `contrato-visuales.md` (v0.3) **no debe mantenerse como un documento aparte**
 - **`taller` y `antesdespues`** (hoy `movil = false` en `lab_mecanicas`) se harán funcionar en la app de iOS. Cuando estén listas, en el mismo cambio: `movil = true` en `lab_mecanicas` y su entrada en `docs/CONTRATO-MECANICAS-MOVIL.md`. No se marcan antes.
 - **`excluye_movil`** solo como último recurso, para un ejercicio concreto.
 - Pendiente para el sitio: el «Siguiente» de la web debería saltarse cualquier ejercicio `solo_movil`.
+
+## Respaldos en la base · decisión de Raúl, 14/10/2026
+
+- **Uno por módulo.** Antes de recargar un módulo: `respaldo.<tabla>_<ruta><modulo>_<aaaammdd>`, por ejemplo `lab_ejercicios_m2_20261014`.
+- **Cada respaldo lleva su nota** (`comment on table`): qué guarda y cuándo se borra.
+- **Se borra cuando Raúl valida el módulo en el sitio.** No se acumulan.
+- Para ver lo que hay y por qué: `select c.relname, obj_description(c.oid) from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'respaldo' and c.relkind = 'r';`
+- Las `_bak_437` a `_bak_444` son de otras sesiones y no llevan nota. No se tocan sin preguntar.
