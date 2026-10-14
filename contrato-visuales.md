@@ -1,6 +1,8 @@
 # Contrato de visuales · DataBoosters Lab
 
-**Versión 0.3 (borrador para revisión con diseño)** · 14-oct-2026
+**Versión 0.4 (borrador para revisión con diseño)** · 14-oct-2026
+
+> **Cambios en la v0.4:** nueva **§9 · Storytelling completo**: el catálogo de todo lo visual que necesitan los 9 módulos de Storytelling, cruzando el temario, la base y lo que el sitio dibuja hoy. Es la lista que el diseño tiene que cubrir para que no queden huecos. También se suman a §8 las reglas de texto que salieron de probar el módulo 1 en el teléfono.
 
 > **Cambios en la v0.3:** nueva regla de **modo de respuesta** (§2.1: cuándo hay botón y cuándo se responde al tocar), nuevas **reglas de contenido** (§2.2), y cierre de los ejercicios pendientes en la base (ya no queda ninguna gráfica con valores no numéricos). Se corrigió una referencia errónea en §6.1: el ejercicio con respuesta "ninguna" es `ST-M2L6-02`.
 
@@ -604,3 +606,161 @@ Por cada familia V1 a V14:
 - Variantes de tamaño: tabla de 1×1 a 10×9 (V1), gráfica de 2 a 6 barras con 1 y 2 series (V2).
 - Los **catálogos cerrados**: 5 roles de celda · 5 partes de Excel (`enfasis`) · 8 dibujos de miniatura · 15 íconos de paso · 3 tonos de paso · efectos de V2.
 - **Comportamiento de texto largo** (opciones de hasta 231 caracteres, enunciados de hasta 331).
+- **Ningún texto se corta nunca.** Piezas, títulos de caja, celdas de hoja y huecos se parten en varias líneas y su contenedor crece. Medido en el teléfono (14-oct-2026): hoy se cortan en 105 de 110 `clasificar` y las filas de la hoja se pisan cuando una celda ocupa dos líneas.
+- **El panel de veredicto no tapa el ejercicio.** Al acertar o fallar, las opciones siguen visibles o se puede desplazar hasta ellas.
+- **La felicitación es una sola frase** (hasta ~90 caracteres). El diseño no debe reservar espacio para un segundo párrafo.
+
+
+---
+
+# 9 · Storytelling completo: todo lo visual que necesitan los 9 módulos
+
+**Para qué es esta sección.** Que el diseño tenga, en un solo lugar, cada pieza visual que pide Storytelling, para que al rehacer los módulos 2 a 9 no aparezca un ejercicio que nadie sabe dibujar.
+
+**De dónde sale** (14-oct-2026):
+- **El temario** (`Propuesta_Temario_Lab_5_rutas_v14.xlsx`, hoja Storytelling): 242 ejercicios, de los que **84 piden algo visual** (gráfica tocable, antes/después, conmutador, miniaturas, marcador arrastrable, constructor, animación, regiones pintables).
+- **La base**: 206 ejercicios de Storytelling. **Solo el módulo 1** usa hoy las mecánicas de arreglar una gráfica (`taller`, `antesdespues`). En los módulos 2 a 9, el 60 % es opción múltiple o explicación, y **23 de 24 gráficas no dicen su tipo** (se dibujan como barras).
+- **El sitio**: la gráfica del aula (`XaGrafica`) dibuja 4 tipos y aplica 9 efectos. El componente `RelGrafica` ya sabe dibujar 13 formas más, pero el aula no lo usa.
+
+**Leyenda de estado:** ✅ existe y se usa · 🟡 existe en el código (`RelGrafica`) pero el aula no lo conecta · 🆕 hay que diseñarlo.
+
+## 9.1 Tipos de gráfica
+
+Todos usan la especificación `Grafica` de §V2 (`tipo`, `titulo`, `series`, `filas[{clave, et, vs[]}]`, `estilo`, `resaltar`). Lo que cambia es el `tipo` y, en algunos, un campo propio.
+
+| `tipo` | Qué es | Módulos que lo piden | Estado | Campo propio |
+|---|---|---|---|---|
+| `barras` | Barras verticales, 1 serie | 1–9 | ✅ | — |
+| `barras` + 2 series | Barras agrupadas (antes/después, año contra año) | 2, 5 | ✅ (1 de 79 lo usa) | `series` de 2 |
+| `barras_h` | Barras horizontales, ordenables | 2, 3, 7 | 🆕 (hoy no hay horizontales en el aula) | — |
+| `linea` | Una o varias series en el tiempo | 1–9 | ✅ | `series` ≥ 1 |
+| `circular` | Pastel | 2, 7 | ✅ | — |
+| `dona` | Dona (para enseñar por qué evitarla) | 2 | 🆕 | — |
+| `dispersion` | Nube de puntos con dos ejes numéricos | 2, 4 | ✅ como `puntos` | `x` y `y` por fila |
+| `multiplos` | Pequeños múltiplos: la misma gráfica repetida, una por categoría, **misma escala** | 2, 4 | 🟡 `multiplos` | `series` = periodos |
+| `pendiente` | Slope chart: una línea por categoría entre 2 o 3 momentos, con valor en cada extremo | 2, 5 | 🟡 `slopegraph` | `series` = momentos |
+| `apiladas_100` | Barra 100 % apilada (proporciones sin total) | 2 | 🟡 `apiladas` | — |
+| `apiladas` | Barras apiladas con montos reales | 2 | 🟡 `apiladas` | — |
+| `ancho_proporcional` | Barras de ancho proporcional al total (marimekko simple) | 2 | 🆕 | `total` por fila |
+| `dos_ejes` | Dos series con eje izquierdo y derecho (para enseñar el engaño) | 2 | 🟡 `dosejes` | `eje` por serie |
+| `calor` | Tabla con color por valor; escala `fila` o `global` | 2 | 🟡 `calor` | `escala: fila \| global` |
+| `kpi` | Tarjeta de un número: valor, meta, % de avance, comparación y mini tendencia (cada parte se enciende aparte) | 2, 8 | 🟡 `numero` + `sparkline` (sin la tarjeta) | `valor`, `meta`, `compara`, `tendencia[]` |
+| `area_lider` | Líneas que se cruzan, con el tramo sombreado del color de quien lidera y los cruces marcados | 4 | 🆕 | — |
+| `cuadrantes` | Dispersión con dos líneas de corte, cuadrantes nombrados y coloreados | 4 | 🆕 | `cortes {x, y}`, `cuadrantes[]` |
+| `tabla` | Tabla de datos como gráfica (bordes, separadores, decimales) para quitarle ruido | 3 | 🟡 `tabla` | — |
+
+## 9.2 Efectos sobre una gráfica (lo que encienden o apagan los mandos)
+
+Vocabulario cerrado: cada mando de `taller`, `antesdespues` y `revisar` declara qué efecto aplica. Hoy hay 9; **Storytelling necesita 31**.
+
+| Efecto | Qué cambia en el dibujo | Módulos | Estado |
+|---|---|---|---|
+| `con_titulo` / `sin_titulo` | Pone o quita el título | 1, 5, 8 | ✅ |
+| `eje_desde_cero` | El eje Y arranca en 0 | 1, 8 | ✅ |
+| `ordenar` | Ordena las barras por valor | 1, 6 | ✅ |
+| `sin_rejilla` / `con_rejilla` | Quita o pone la rejilla | 1, 3, 6, 9 | ✅ |
+| `sin_3d` / `con_3d` | Quita o pone la perspectiva 3D | 1, 2, 7 | ✅ |
+| `sin_arcoiris` / `con_arcoiris` | Un color o uno por barra | 1, 3, 4 | ✅ |
+| `sin_eje_y` / `con_eje_y` | Quita o pone el eje vertical | 1, 3 | ✅ |
+| `con_animacion` | Animación de entrada (distractor) | 1 | ✅ |
+| cambio de `tipo` | Pasa de barras a línea, pastel o puntos | 2, 9 | ✅ |
+| `resaltar` | Una serie o barra en color; el resto en gris | 1, 4, 6, 9 | 🆕 |
+| `atenuar_resto` | Las series no resaltadas bajan de opacidad | 2, 4 | 🆕 |
+| `sin_leyenda` + `etiqueta_directa` | Quita la caja de leyenda y nombra cada serie al final de su línea | 2, 3, 5 | 🆕 |
+| `sin_borde` | Quita el marco de la gráfica | 3, 6 | 🆕 |
+| `sin_fondo` | Quita el color de fondo | 3 | 🆕 |
+| `sin_marcadores` | Quita los puntos de cada línea | 3 | 🆕 |
+| `sin_decimales` | Redondea las etiquetas | 3 | 🆕 |
+| `sin_sombra` | Quita sombras | 3 | 🆕 |
+| `tabla_lineas_suaves` | Tabla sin bordes, solo separadores horizontales claros | 3 | 🆕 |
+| `anotacion` | Flecha o nota corta junto a un dato | 4, 6, 7 | 🆕 |
+| `meta_punteada` | Línea horizontal punteada de meta | 2 | 🆕 |
+| `pct_avance` | Porcentaje de avance contra la meta | 2 | 🆕 |
+| `comparacion` | «▲ 18 % vs. año pasado» junto al número | 2 | 🆕 |
+| `mini_tendencia` | Sparkline junto al número | 2 | 🆕 |
+| `separar_paneles` | Pasa de una gráfica a pequeños múltiplos | 2 | 🆕 |
+| `unir_categorias` | Une cada categoría entre momentos (de barras a pendiente) | 2, 5 | 🆕 |
+| `etiqueta_extremos` | Valor en cada extremo de la línea | 2, 5 | 🆕 |
+| `ancho_proporcional` | El ancho de cada barra pasa a ser su total | 2 | 🆕 |
+| `etiqueta_total` | Total sobre cada barra apilada | 2 | 🆕 |
+| `sombrear_lider` / `marcar_cruces` | Sombra del líder y línea vertical en cada cruce | 4 | 🆕 |
+| `lineas_corte` / `nombrar_cuadrantes` / `colorear_cuadrantes` | Las tres capas de los cuadrantes | 4 | 🆕 |
+| `contraste` / `fuente_grande` / `agrandar_dato` | Accesibilidad y jerarquía: contraste, tamaño de ejes, el número clave más grande | 4, 5, 8 | 🆕 |
+
+**Regla para el diseño:** cada efecto tiene que verse en una gráfica de 120 px de alto (miniatura) y en una de 260 px (aula). Si no se distingue en pequeño, no sirve para `miniaturas`.
+
+## 9.3 Interacciones sobre la gráfica
+
+| Interacción | Qué hace el alumno | Módulos | Estado |
+|---|---|---|---|
+| Tocar un dato | Toca una barra, un punto o una rebanada (`clic-dato`) | 2–9 | ✅ |
+| Tocar un **elemento** para quitarlo | Toca la rejilla, el borde, la leyenda o la sombra en la gráfica misma, no en un botón (temario M17, 36 ejercicios) | 1, 2, 3, 6, 7, 8, 9 | 🆕 hoy se hace con botones aparte (`taller`) |
+| Pintar | Toca barras o series para ponerles el color de acento (M10) | 1, 4, 6, 9 | 🆕 |
+| Pintar una región | Arrastra para marcar una zona de la dispersión (cuadrante «quick wins») | 4 | 🆕 |
+| Arrastrar al sitio | Lleva título, leyenda, etiqueta o anotación a su lugar, con imán (M09) | 3, 4, 5, 6, 7 | 🆕 |
+| Arrastrar una línea | Mueve una línea de corte o un eje secundario y la gráfica se redibuja | 2, 4 | 🆕 |
+| Dibujar la predicción | Toca columnas para dibujar cómo crees que va cada serie; «Revelar» superpone la real (M27) | 4 | 🆕 |
+| Constructor | Elige tipo y ejes, y la gráfica se dibuja en vivo (M20) | 2, 9 | ✅ `armagrafica` (sin ejes) |
+| Animación por pasos | ◀ ▶ por capas, una frase por paso (M00-A) | 3, 7, 8 | 🟡 `animada` existe en Excel |
+| Revelar por capas | Conmutador que agrega una capa a la vez: ejes, serie base, serie clave, anotación | 7, 8 | 🆕 |
+
+## 9.4 Miniaturas (catálogo de `dibujo`)
+
+Hoy hay 8 dibujos genéricos (§V3). Cualquier nombre que no esté en el catálogo **se dibuja como un «83»**. Storytelling necesita estos:
+
+| `dibujo` | Qué muestra | Módulos | Estado |
+|---|---|---|---|
+| `barras`, `linea`, `circular`, `puntos`, `color`, `numero`, `ganar_perder` | Los genéricos de hoy | 2–8 | ✅ |
+| `texto` | Una frase en la tarjeta (título de acción, Gran Idea) | 1, 5 | 🟡 existe en `LabMiniaturas`, no en el aula |
+| `kpi` | Tarjeta de un número con o sin contexto | 2 | 🆕 |
+| `multiplos` | Seis paneles pequeños | 2, 4 | 🆕 |
+| `lineas_encimadas` | Muchas líneas del mismo color encimadas | 2, 4 | 🆕 |
+| `pendiente` | Líneas de un momento a otro | 2, 5 | 🆕 |
+| `apiladas` | Barra 100 % apilada | 2 | 🆕 |
+| `dona` | Dona | 2, 7 | 🆕 |
+| `barras_h` | Barras horizontales ordenadas | 2, 7 | 🆕 |
+| `paleta` | Cuatro muestras de color (paleta segura o no) | 4 | 🆕 |
+| `movil` / `escritorio` | La misma gráfica a 390 px y en pantalla ancha | 8 | 🆕 |
+
+**Mejor aún:** que una miniatura pueda ser **una `Grafica` completa en pequeño** (como ya hace `LabMiniaturas` con `RelGrafica`). Así no hace falta un dibujo nuevo por concepto y cualquier efecto de §9.2 se ve en la miniatura.
+
+## 9.5 Vistas comparadas (conmutador)
+
+Cada vista debe traer **su propia `Grafica`** (y sus efectos), no solo un texto. El cargador ya la transmite desde el 14-oct-2026 (`vistas[].grafica`). Pares que pide Storytelling:
+
+| Par de vistas | Módulos |
+|---|---|
+| Director ↔ Operaciones (mismo dato, otro título y otro resaltado) | 1 |
+| Texto ↔ Tabla ↔ Gráfica (tres vistas) | 2 |
+| Pastel ↔ Barras ordenadas | 2, 7 |
+| Pequeños múltiplos ↔ Una resaltada | 2, 4 |
+| Escala por fila ↔ Escala global (mapa de calor) | 2 |
+| Normal ↔ Como la ve alguien con daltonismo | 4, 5 |
+| Antes ↔ Después (cinco gráficas reales) | 3, 6 |
+| Capa 1 → 2 → 3 → 4 (revelado progresivo, sin pausa ↔ con pausa) | 7, 8 |
+| Escritorio ↔ Móvil | 8 |
+| Tu versión ↔ La de referencia | 6, 9 |
+
+**Simulación de daltonismo:** ya existe en `RelGrafica` (`paleta: 'daltonica'`, Viénot-Brettel-Mollon). 🟡
+
+## 9.6 Superficies que no son gráficas
+
+| Superficie | Qué es | Módulos | Estado |
+|---|---|---|---|
+| Hoja con color por valor | La tabla de §V1 con fondo de celda según su valor (mapa de calor) | 2 | 🆕 |
+| Tarjetas de dashboard | Rejilla de tarjetas KPI que se quitan y se reordenan | 8 | 🆕 |
+| Notas de storyboard | Post-its tocables y reordenables | 1, 7 | 🆕 (hoy son fichas de texto) |
+| Lista de verificación | Checklist que se marca contra una gráfica | 9 | 🆕 |
+
+## 9.7 Qué desbloquea cada pieza (prioridad sugerida)
+
+1. **Efectos `resaltar`, `atenuar_resto`, `sin_leyenda` + `etiqueta_directa`, `sin_borde` y `anotacion`.** Son la base de los módulos 3, 4, 6 y 9 (quitar ruido, dirigir la atención, reconstruir).
+2. **Conectar `RelGrafica` al aula:** `multiplos`, `pendiente`, `apiladas`, `dos_ejes`, `calor` y `kpi` ya están dibujados. Desbloquea casi todo el módulo 2.
+3. **Tocar el elemento en la gráfica** (no en un botón aparte): la mecánica más pedida del temario (36 ejercicios).
+4. **Vistas con gráfica propia** en el conmutador: 10 pares en 7 módulos.
+5. **Arrastrar al sitio** (anotación, etiqueta, línea de corte): módulos 3, 4, 5, 6 y 7.
+6. Lo demás: dibujar la predicción, cuadrantes, área del líder, tarjetas de dashboard, post-its y checklist.
+
+## 9.8 Lo que ya está escrito y espera a estas piezas
+
+El módulo 2 rehecho (`_lab/storytelling/02-elegir-el-visual-correcto/`, 53 ejercicios, **aún no cargado en la base**) ya usa: `multiplos`, `apiladas`, `circular`, `barras_h` y `calor` como `tipo`; `lineas_encimadas`, `multiplos`, `pendiente`, `apiladas` y `dona` como `dibujo`; y vistas con gráfica propia en sus 3 conmutadores. Hasta que el sitio los dibuje, esos ejercicios se ven incompletos (barras por defecto, o un «83» en la miniatura).
