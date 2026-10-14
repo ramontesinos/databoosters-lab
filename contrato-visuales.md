@@ -763,4 +763,11 @@ Cada vista debe traer **su propia `Grafica`** (y sus efectos), no solo un texto.
 
 ## 9.8 Lo que ya está escrito y espera a estas piezas
 
-El módulo 2 rehecho (`_lab/storytelling/02-elegir-el-visual-correcto/`, 53 ejercicios, **aún no cargado en la base**) ya usa: `multiplos`, `apiladas`, `circular`, `barras_h` y `calor` como `tipo`; `lineas_encimadas`, `multiplos`, `pendiente`, `apiladas` y `dona` como `dibujo`; y vistas con gráfica propia en sus 3 conmutadores. Hasta que el sitio los dibuje, esos ejercicios se ven incompletos (barras por defecto, o un «83» en la miniatura).
+El módulo 2 rehecho (`_lab/storytelling/02-elegir-el-visual-correcto/`, 53 ejercicios, **cargado el 14/10/2026**) ya usa: `multiplos`, `apiladas`, `circular`, `barras_h` y `calor` como `tipo`; `lineas_encimadas`, `multiplos`, `pendiente`, `apiladas` y `dona` como `dibujo`; y vistas con gráfica propia en sus 3 conmutadores. Hasta que el sitio los dibuje, esos ejercicios se ven incompletos (barras por defecto, o un «83» en la miniatura).
+
+El módulo 3 (`03-eliminar-el-ruido-visual/`, 25 ejercicios, cargado el 14/10/2026) usa:
+- `resaltar` en un `clic-dato` (st03-clic-dato-01: una barra en color, las demás en gris). Sin `resaltar` dibujado, las cuatro barras salen iguales y el ejercicio no tiene respuesta visible.
+- `estilo` en las dos vistas del «antes / después» (st03-conmutador-01): `rejilla`, `borde`, `tresd`, `leyenda` y `colorPorBarra` encendidos en «Antes» y apagados en «Después». También trae las banderas que el aula ya dibuja (`tresd`, `arcoiris`, `sinRejilla`), así que hoy ya se ve una diferencia; `borde` y `leyenda` esperan a §9.2.
+- `lineas_encimadas` como `dibujo` (st03-miniaturas-01).
+
+**Cargador, 14/10/2026:** `resaltar` y `estilo` ahora llegan a la base, en `clic-dato` y en `vistas[].grafica`. Antes se perdían al cargar: la vista «Una resaltada» del módulo 2 (st02-conmutador-01) quedó sin resaltado, y ya se corrigió en la base.
