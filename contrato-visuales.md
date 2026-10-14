@@ -1,6 +1,8 @@
 # Contrato de visuales · DataBoosters Lab
 
-**Versión 0.2 (borrador para revisión con diseño)** · 14-oct-2026
+**Versión 0.3 (borrador para revisión con diseño)** · 14-oct-2026
+
+> **Cambios en la v0.3:** nueva regla de **modo de respuesta** (§2.1: cuándo hay botón y cuándo se responde al tocar), nuevas **reglas de contenido** (§2.2), y cierre de los ejercicios pendientes en la base (ya no queda ninguna gráfica con valores no numéricos). Se corrigió una referencia errónea en §6.1: el ejercicio con respuesta "ninguna" es `ST-M2L6-02`.
 
 > **Cambios respecto a la v0.1:** se corrigieron en la base los ejercicios con datos rotos (ver §6.1) y se rectificaron tres hallazgos propios: `emparejar` son **10** ejercicios afectados (no 11; `xl00-emparejar-01` estaba sano), sus respuestas guardadas también estaban empaquetadas, y el alcance de "Pulsa Comprobar sin botón" es mayor de lo dicho.
 
@@ -97,6 +99,51 @@ Lista de `{ tono, icono, texto }`.
 | `lab_soluciones.diagnosticos` | `{ valor_de_la_opcion: texto }` | **Panel de error por opción** (mensaje específico) |
 
 Longitudes observadas (para dimensionar): enunciado promedio 129 caracteres, **máximo 331**. Etiqueta de opción promedio 52, **máximo 231**, y **31 % pasa de 60 caracteres**.
+
+## 2.1 Modo de respuesta: cuándo hay botón y cuándo se responde al tocar
+
+**Principio:** el botón existe para dar una **segunda oportunidad**. Se responde al tocar solo cuando equivocarse al tocar es barato. Si el alumno arma algo, o tiene que mirar y explorar antes de decidir, se confirma con un botón.
+
+| Modo | Qué hace el alumno | Cuándo corresponde | Mecánicas |
+|---|---|---|---|
+| **A · Tocar y listo** | Toca una opción y recibe el veredicto en el acto. Sin botón | Una sola elección, opciones de texto con zonas grandes, error barato | `opcion`, `detective`, `magnitud`, `encuesta`, `clic-celda`, `emparejar` (juzga cada pareja), `conexiones` (juzga cada familia), `escenario` y `ramificar` (retroalimentación por parada, nunca bloquea) |
+| **B · Armar y comprobar** | Construye la respuesta con varias acciones y la confirma con **Comprobar** | Varias piezas, celdas, un orden, un número o varios mandos | `clic-celdas`, `pintar`, `ordenar`, `clasificar`, `cloze`, `adivina`, `estimar`, `ajustar`, `balance`, `arrastre`, `filtros`, `dinamica`, `taller`, `antesdespues`, `cambios`, `revisar`, `reacomodar` |
+| **C · Elegir sobre un visual** | Toca un elemento de una gráfica o miniatura; queda **seleccionado**; confirma con **Comprobar** | El objetivo es pequeño, hay que mirar, comparar o probar antes, y el toque accidental es probable (celular) | `clic-dato`, `miniaturas`, `armagrafica` |
+| **D · Leer sin veredicto** | Lee o explora; pulsa **Continuar** | No hay respuesta correcta | `explicacion`, `conmutador`, `animada` |
+
+**Por qué `clic-dato`, `miniaturas` y `armagrafica` van en el modo C y no en el A:**
+1. Su propio texto de instrucción ya dice "Pulsa Comprobar" (en el 100 % de los casos), y `armagrafica` dice "Pruébalos todos antes de decidir". Si respondieran al tocar, no se podría probar sin equivocarse.
+2. Los objetivos (una barra, un punto, una miniatura de 120×54) son pequeños; en celular el toque accidental es frecuente.
+3. Comparten la misma barra inferior que el modo B: **un patrón menos que diseñar.**
+
+**Estado actual de los datos:** `clic-dato` (59), `miniaturas` (35), `armagrafica` (16) y `filtros` (10) tienen `sinBoton: true`, o sea que hoy se comportan como modo A aunque su texto pida Comprobar (**120 ejercicios**).
+**Decisión propuesta:** pasarlos a botón (`sinBoton: false`). ⚠️ Requiere confirmar que el renderizador lo soporta: se prueba primero con un solo ejercicio (`ST-M1L1-02`). Si no lo soporta, la alternativa es quitar el paso "Pulsa Comprobar" del texto de esos ejercicios.
+
+### La barra inferior (un solo componente)
+
+| Estado | Texto | Cuándo |
+|---|---|---|
+| Deshabilitado | "Falta 1 hueco", "Falta elegir…" | Aún no hay respuesta completa. **El texto dice qué falta** (como en la captura del ejercicio de storytelling) |
+| Habilitado | "Comprobar" | La respuesta está completa |
+| Tras el veredicto | "Continuar" | Acierto o error ya mostrado |
+| Lectura (modo D) | "Continuar" | Siempre habilitado |
+
+Misma posición en todas las pantallas, fija abajo, al alcance del pulgar. En el modo A no aparece hasta el veredicto, y entonces solo muestra "Continuar".
+
+## 2.2 Reglas de contenido (para quien escribe ejercicios)
+
+Nacen de los errores que se encontraron en los datos. Un ejercicio que las incumple se rechaza antes de publicarse.
+
+| # | Regla | Ejemplo del problema |
+|---|---|---|
+| R1 | **Una etiqueta no describe el atributo visual que el alumno debe percibir** | `ST-M4L1-04`: "Producto B (grande, color)" regala la respuesta de un ejercicio que debería resolverse mirando la gráfica |
+| R2 | **Toda elección tocable tiene al menos 3 opciones**, con distractores plausibles que fallan por una razón que la lección enseña, y **cada incorrecta con su propio mensaje de error** | `ST-M6L1-02` tenía una sola opción, siempre correcta; `miniaturas` tiene 24 ejercicios con 2 opciones |
+| R3 | **El enunciado no depende de algo que la pantalla no muestra.** Si empieza con "Y…" o dice "la gráfica", ese elemento está en pantalla (`contexto`, `grafica` o `hoja`) | El ejercicio "Y quiero que ___" sin su primera mitad; `opcion` no puede mostrar gráfica |
+| R4 | **"Cayó", "subió" y "mejoró" exigen dos periodos en los datos** | `ST-M1L1-02`: "la región que cayó" con un solo trimestre |
+| R5 | **El texto de `comoSeHace` coincide con el modo de respuesta** (§2.1) | 120 ejercicios dicen "Pulsa Comprobar" sin botón |
+| R6 | **Una historia, un conjunto de datos.** Las cifras (regiones, periodos, cantidades) no cambian entre ejercicios de una misma lección | 4 regiones en un ejercicio y 6 rebanadas en otro, con "los mismos datos" |
+| R7 | **`vs` es siempre un número.** El texto va en `et` | 19 filas con texto en el valor |
+| R8 | **Referencias al pasado del alumno son verdad.** No se dice "lo que quitaste" si el alumno no quitó nada | Lección 1 de Storytelling |
 
 ---
 
@@ -482,14 +529,14 @@ Es la lista de trabajo de la siguiente fase.
 
 | # | Hallazgo | Alcance |
 |---|---|---|
-| H1 | **Filas de gráfica con valor no numérico o vacío** | ✅ **10 de 11 ejercicios corregidos** (18 de 19 filas). **Pendiente:** `ST-M4L1-04` (falta el valor de la barra "grande, en color", ver §7). Patrón de origen: la etiqueta se cortaba en una coma o en un `:` |
+| H1 | **Filas de gráfica con valor no numérico o vacío** | ✅ **11 de 11 ejercicios corregidos** (19 de 19 filas). Hoy las 79 gráficas tienen solo valores numéricos. Patrón de origen: la etiqueta se cortaba en una coma o en un `:` |
 | H2 | **`emparejar` con parejas empaquetadas** | ✅ **10 de 10 corregidos:** `ST-M2L1-06`, `ST-M2L2-04`, `ST-M2L6-05`, `ST-M8L4-07`, `ES-M8L3-04`, `ES-M4L3-07`, `ES-M1L2-05`, `ES-M1L3-05`, `ES-M6L7-04`, `ES-M8L2-04` |
-| H3 | **Elementos tocables de una composición metidos en `grafica`** (leyenda, KPI, eje) | ⚠️ **Abierto.** La etiqueta ya está limpia, pero el ejercicio sigue mal planteado. `ST-M5L1-04`, `ST-M6L1-03`, `ST-M8L1-02` necesitan la familia 🆕 *Composición con zonas tocables*. **Tres son degenerados** porque tienen **una sola opción tocable que siempre es la correcta**: `ST-M6L1-02`, `ST-M6L1-03`, `ES-M9L1-04`. Necesitan distractores nuevos (contenido) |
+| H3 | **Elementos tocables de una composición metidos en `grafica`** (eje, leyenda, KPI, color) | ⚠️ **Parcial.** Los 3 ejercicios degenerados (`ST-M6L1-02`, `ST-M6L1-03`, `ES-M9L1-04`, que tenían una sola opción siempre correcta) ya tienen 3 opciones y mensaje de error por distractor (✅). **Siguen abiertos** `ST-M4L1-04`, `ST-M5L1-04`, `ST-M6L1-02`, `ST-M6L1-03` y `ST-M8L1-02`: su premisa es visual (color, eje, leyenda, KPI) y hoy solo se **describe en texto**. Necesitan la familia 🆕 *Composición con zonas tocables* y la bandera 🆕 `resaltar` |
 | H4 | **Barras sin `clave`** | 13 filas |
 | H5 | **Gráfica con forma distinta** (`ajustar.categorias`, `cambios`, `reacomodar`) | 3 ejercicios |
 | H6 | **`miniaturas`**: 24 de 35 con 2 opciones; 1 `dibujo` con texto libre | 35 |
 | H7 | **`contexto` vacío**, aunque el enunciado depende de un escenario previo | ≈ 1,980 ejercicios |
-| H8 | **Texto "Pulsa Comprobar" en ejercicios con `sinBoton: true`** | ⚠️ **Por verificar en pantalla.** Coincide en el 100 % de `clic-dato` (59), `miniaturas` (35), `armagrafica` (16) y `filtros` (10): **120 ejercicios**. Ojo: `cloze` sí muestra un botón (captura "Falta 1 hueco") aunque `lab_mecanicas.con_boton` es `false`, así que ese campo **no** indica si hay botón visible. Basta abrir `ST-M1L1-02` para confirmarlo |
+| H8 | **Texto "Pulsa Comprobar" en ejercicios con `sinBoton: true`** | ⚠️ **Decisión tomada en §2.1: pasarlos a botón (modo C). Por verificar en pantalla antes de aplicar.** Coincide en el 100 % de `clic-dato` (59), `miniaturas` (35), `armagrafica` (16) y `filtros` (10): **120 ejercicios**. Ojo: `cloze` sí muestra un botón (captura "Falta 1 hueco") aunque `lab_mecanicas.con_boton` es `false`, así que ese campo **no** indica si hay botón visible. Basta abrir `ST-M1L1-02` para confirmarlo |
 | H9 | **Campos muertos o duplicados en `hoja`** | `cols` (524), `oculta` (524) |
 | H10 | **Nombres duplicados de efecto** (`rejilla`/`cuadricula`, `tresd`/`agregar_3d`, 5 de "color por barra") | 17 mandos |
 | H11 | **`gesto`**: 72 textos distintos, 909 vacíos | Todos |
@@ -497,7 +544,7 @@ Es la lista de trabajo de la siguiente fase.
 
 ## 6.1 Cambios ya aplicados en la base (14-oct-2026)
 
-**Alcance:** 20 ejercicios modificados, y en 10 de ellos también su respuesta. Solo se tocaron `lab_ejercicios.dataset` (y `updated_at`) y, en `emparejar`, `lab_soluciones.solucion` y `.resultado`. No se tocó código, estructura de tablas ni otros ejercicios.
+**Alcance:** 21 ejercicios modificados. Solo se tocaron `lab_ejercicios.dataset` (y `updated_at`) y, en `lab_soluciones`: `solucion` y `resultado` en los 10 de `emparejar`, y `diagnosticos` en 3 ejercicios. No se tocó código, estructura de tablas ni otros ejercicios.
 
 | Grupo | Ejercicios | Qué se hizo |
 |---|---|---|
@@ -507,12 +554,14 @@ Es la lista de trabajo de la siguiente fase.
 | Texto en el valor (2) | `ST-M8L1-02`, `ES-M9L1-04` | Etiqueta completa, valor `[1]` |
 | Mes en la etiqueta (1) | `ES-M10L4-02` | Cada opción ahora dice su mes ("Marzo: residuo grande…") |
 | Etiqueta y valor intercambiados (1) | `ST-M2L3-03` | `et` = cantidad (10 a 30), `vs` = precio (120 a 50). ⚠️ **Es una inferencia**; conviene verlo en pantalla |
+| Valor faltante (1) | `ST-M4L1-04` | Barra B = 60 (las demás: 40, 42, 38). La etiqueta conserva "(grande, color)" hasta que exista `resaltar` (ver R1) |
+| Una sola opción → tres (3) | `ST-M6L1-02`, `ST-M6L1-03`, `ES-M9L1-04` | Dos distractores plausibles por ejercicio, y mensaje de error específico para cada uno en `lab_soluciones.diagnosticos` |
 
 **Criterio para tarjetas tocables sin datos:** donde una opción no es una barra real (frases, ejes, leyendas), el valor se dejó en `[1]`, igual que las filas hermanas que ya lo traían. Es un marcador de posición, no un dato.
 
-**Verificación posterior:** las 59 soluciones de `clic-dato` siguen apuntando a una opción existente (58, más la "ninguna" intencional de `ST-M2L6-05`), y las filas con valor no numérico bajaron de 19 a 1.
+**Verificación posterior:** las 59 soluciones de `clic-dato` siguen apuntando a una opción existente (58, más la "ninguna" intencional de `ST-M2L6-02`), y las filas con valor no numérico bajaron de 19 a **0**. Los 3 ejercicios con distractores nuevos mantienen su solución apuntando a una opción existente.
 
-**Respaldo:** esquema privado `respaldo`, sin permisos para `anon` ni `authenticated` y con seguridad por filas activa (porque contiene respuestas). Tablas `respaldo.lab_ejercicios_20261014` y `respaldo.lab_soluciones_20261014`, con el estado **anterior** de los 20 ejercicios. Para revertir uno:
+**Respaldo:** esquema privado `respaldo`, sin permisos para `anon` ni `authenticated` y con seguridad por filas activa (porque contiene respuestas). Tablas `respaldo.lab_ejercicios_20261014` y `respaldo.lab_soluciones_20261014`, con el estado **anterior** de los 21 ejercicios. Para revertir uno:
 
 ```sql
 update public.lab_ejercicios e
@@ -537,11 +586,13 @@ update public.lab_soluciones s
 5. **Familia nueva: Composición con zonas tocables** (diapositiva, dashboard, interfaz), para sacar de V2 lo que no es gráfica. ¿Se crea?
 6. **Móvil:** `taller`, `antesdespues` y `revisar` son solo web. ¿Se construye widget móvil o se usan variantes (`solo_movil` / `variante_de`)?
 7. **Qué es `contexto`** visualmente: ¿tarjeta sobre el enunciado? ¿Se pinta en todas las mecánicas o solo en `conmutador`? ⚠️ **verificar**.
-8. **`ST-M4L1-04` (pendiente):** la barra "Producto B (grande, color)" no tiene valor. Las demás valen 40, 42 y 38 y el enunciado dice que B es "más grande". **Propuesta: 60.** ¿Se acepta?
-9. **Ejercicios degenerados** (`ST-M6L1-02`, `ST-M6L1-03`, `ES-M9L1-04`): una sola opción tocable que siempre es la correcta. ¿Se les agregan distractores ahora (contenido) o esperan a la familia *Composición con zonas tocables*?
+8. ✅ **Resuelta.** `ST-M4L1-04`: barra B = 60.
+9. ✅ **Resuelta.** Ejercicios degenerados: ya tienen 3 opciones con diagnóstico.
 10. **`ST-M2L3-03`:** confirmar en pantalla que `et` = cantidad y `vs` = precio es la lectura correcta de "precio vs. cantidad vendida".
 11. **Barras sin `clave` (H4):** son 13 filas, todas en la ruta de pruebas (`alpha-antesdespues`, `alpha-armagrafica`, `alpha-taller`). No se tocaron; sin urgencia.
-
+12. **Modo de respuesta (§2.1):** confirmar con `ST-M1L1-02` que el renderizador soporta botón en `clic-dato`, `miniaturas`, `armagrafica` y `filtros`. Si lo soporta, se pasan 120 ejercicios a `sinBoton: false`; si no, se quita "Pulsa Comprobar" de su texto.
+13. **Bandera `resaltar` y familia *Composición con zonas tocables*:** desbloquean `ST-M4L1-04`, `ST-M5L1-04`, `ST-M6L1-02`, `ST-M6L1-03` y `ST-M8L1-02`, cuya premisa visual hoy solo se describe en texto.
+14. **El cargador de ejercicios:** el patrón de errores (etiquetas partidas en comas, parejas empaquetadas con `|` y `:`) apunta a un fallo al importar. Mientras no se corrija, volverá a pasar con cada carga nueva. Hace falta saber cómo se cargan los ejercicios y dónde vive ese script.
 ---
 
 # 8 · Qué se le pide al diseño por familia
