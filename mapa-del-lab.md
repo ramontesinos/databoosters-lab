@@ -155,3 +155,11 @@ Mi `contrato-visuales.md` (v0.3) **no debe mantenerse como un documento aparte**
 3. **¿Mis 5 contenidos inventados se quedan, se ajustan o se revierten?**
 4. **¿Dejo de mantener `contrato-visuales.md` y reparto su contenido según §5?**
 5. **¿Se arregla también el kit y el conversor** (para que mis 21 correcciones sobrevivan a una recarga), o se descarta el kit?
+
+## Decisión de Raúl, 14/10/2026 · una sola versión por ejercicio
+
+- **Un ejercicio, una versión.** Nada de variantes móviles (`variante_de` / `solo_movil`): duplican contenido y el «Siguiente» de la web llegaba a la variante, que la web no pinta. La única que existía (`st01-taller-02-movil`) se borró, con respaldo en `respaldo.lab_variante_st01_20261014`.
+- **Dedo o mouse lo resuelve la mecánica**, en su componente, no el contenido.
+- **`taller` y `antesdespues`** (hoy `movil = false` en `lab_mecanicas`) se harán funcionar en la app de iOS. Cuando estén listas, en el mismo cambio: `movil = true` en `lab_mecanicas` y su entrada en `docs/CONTRATO-MECANICAS-MOVIL.md`. No se marcan antes.
+- **`excluye_movil`** solo como último recurso, para un ejercicio concreto.
+- Pendiente para el sitio: el «Siguiente» de la web debería saltarse cualquier ejercicio `solo_movil`.
