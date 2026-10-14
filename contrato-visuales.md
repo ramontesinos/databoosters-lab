@@ -416,7 +416,7 @@ La solución es la lista de `clave` que cambiaron. Dos gráficas apiladas.
 
 **Contrato:** una pareja por elemento de la lista, **mínimo 3**. La respuesta (`lab_soluciones.solucion`) es `a=b|a=b|a=b` y `resultado` es `[["a=b|a=b|a=b"]]`. Es el formato que ya usaban los ejercicios sanos de Excel, SQL y Storytelling (`ST-M3L2-04`).
 
-✅ **Corregido el 14-oct-2026:** 10 ejercicios (6 de Estadística, 4 de Storytelling) tenían **una sola pareja** y el resto empaquetado dentro de `b` con `|` y `:`. Su respuesta guardada también estaba empaquetada, con `=` en la primera pareja y `:` en las demás, lo que casi con seguridad impedía resolverlos. Hoy los 22 `emparejar` cumplen el contrato (ver §6.1).
+✅ **Corregido el 14-oct-2026:** 10 ejercicios (6 de Estadística, 4 de Storytelling) tenían **una sola pareja** y el resto empaquetado dentro de `b` con `|` y `:`. Su respuesta guardada también estaba empaquetada, con `=` en la primera pareja y `:` en las demás. **Rectificación:** en la v0.2 y la v0.3 dije que eso casi con seguridad impedía resolverlos, y era falso. El componente (`LabEmparejar.tsx`) arma la respuesta como `a=b\|a=b…`, y con una sola pareja la respuesta coincidía con la guardada, por lo que **sí se podían resolver** (el QA del 13-oct los dio por buenos). Lo que ocurría es que eran ejercicios **degenerados**: una ficha contra una ficha, con todo el texto empaquetado en la ficha derecha y nada que emparejar. Hoy los 22 `emparejar` cumplen el contrato (ver §6.1).
 
 ---
 
