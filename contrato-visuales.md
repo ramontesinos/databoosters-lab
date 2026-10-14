@@ -1,6 +1,8 @@
 # Contrato de visuales · DataBoosters Lab
 
-**Versión 0.1 (borrador para revisión con diseño)** · 14-oct-2026
+**Versión 0.2 (borrador para revisión con diseño)** · 14-oct-2026
+
+> **Cambios respecto a la v0.1:** se corrigieron en la base los ejercicios con datos rotos (ver §6.1) y se rectificaron tres hallazgos propios: `emparejar` son **10** ejercicios afectados (no 11; `xl00-emparejar-01` estaba sano), sus respuestas guardadas también estaban empaquetadas, y el alcance de "Pulsa Comprobar sin botón" es mayor de lo dicho.
 
 ## Qué es este documento
 
@@ -365,7 +367,9 @@ La solución es la lista de `clave` que cambiaron. Dos gráficas apiladas.
 | `emparejar[].a` | texto | **Sí** | Elemento de la columna fija |
 | `emparejar[].b` | texto | **Sí** | Su pareja. Un solo valor |
 
-⚠️ **Hallazgo:** en **11 de 22 ejercicios** hay **una sola pareja** y el resto viene empaquetado dentro de `b` con `|` y `:` (ej. `"Texto grande|3 ciudades por 12 meses exactos:Tabla|…"`). ⚠️ **verificar en pantalla** (`ST-M2L1-06`) si el renderizador lo desempaqueta. Contrato: **una pareja por elemento de la lista**, mínimo 3.
+**Contrato:** una pareja por elemento de la lista, **mínimo 3**. La respuesta (`lab_soluciones.solucion`) es `a=b|a=b|a=b` y `resultado` es `[["a=b|a=b|a=b"]]`. Es el formato que ya usaban los ejercicios sanos de Excel, SQL y Storytelling (`ST-M3L2-04`).
+
+✅ **Corregido el 14-oct-2026:** 10 ejercicios (6 de Estadística, 4 de Storytelling) tenían **una sola pareja** y el resto empaquetado dentro de `b` con `|` y `:`. Su respuesta guardada también estaba empaquetada, con `=` en la primera pareja y `:` en las demás, lo que casi con seguridad impedía resolverlos. Hoy los 22 `emparejar` cumplen el contrato (ver §6.1).
 
 ---
 
@@ -478,18 +482,49 @@ Es la lista de trabajo de la siguiente fase.
 
 | # | Hallazgo | Alcance |
 |---|---|---|
-| H1 | **Filas de gráfica con valor no numérico o vacío** | 19 filas en 11 ejercicios: `ST-M2L3-03`, `ST-M2L8-04`, `ST-M4L1-04`, `ST-M5L1-04`, `ST-M6L1-02`, `ST-M6L1-03`, `ST-M8L1-02`, `ES-M7L2-03`, `ES-M9L1-04`, `ES-M10L4-02`, `ES-M11L5-04`. Patrón: la etiqueta se corta en una coma o en un `:` |
-| H2 | **`emparejar` con parejas empaquetadas** | 11 de 22: `ST-M2L1-06`, `ST-M2L2-04`, `ST-M2L6-05`, `ST-M8L4-07`, `ES-M8L3-04`, `ES-M4L3-07`, `ES-M1L2-05`, `ES-M1L3-05`, `ES-M6L7-04`, `ES-M8L2-04`, `xl00-emparejar-01` |
-| H3 | **Elementos tocables de una composición metidos en `grafica`** (leyenda, KPI, eje) | `ST-M5L1-04`, `ST-M6L1-03`, `ST-M8L1-02`. Necesitan la familia 🆕 *Composición con zonas tocables* |
+| H1 | **Filas de gráfica con valor no numérico o vacío** | ✅ **10 de 11 ejercicios corregidos** (18 de 19 filas). **Pendiente:** `ST-M4L1-04` (falta el valor de la barra "grande, en color", ver §7). Patrón de origen: la etiqueta se cortaba en una coma o en un `:` |
+| H2 | **`emparejar` con parejas empaquetadas** | ✅ **10 de 10 corregidos:** `ST-M2L1-06`, `ST-M2L2-04`, `ST-M2L6-05`, `ST-M8L4-07`, `ES-M8L3-04`, `ES-M4L3-07`, `ES-M1L2-05`, `ES-M1L3-05`, `ES-M6L7-04`, `ES-M8L2-04` |
+| H3 | **Elementos tocables de una composición metidos en `grafica`** (leyenda, KPI, eje) | ⚠️ **Abierto.** La etiqueta ya está limpia, pero el ejercicio sigue mal planteado. `ST-M5L1-04`, `ST-M6L1-03`, `ST-M8L1-02` necesitan la familia 🆕 *Composición con zonas tocables*. **Tres son degenerados** porque tienen **una sola opción tocable que siempre es la correcta**: `ST-M6L1-02`, `ST-M6L1-03`, `ES-M9L1-04`. Necesitan distractores nuevos (contenido) |
 | H4 | **Barras sin `clave`** | 13 filas |
 | H5 | **Gráfica con forma distinta** (`ajustar.categorias`, `cambios`, `reacomodar`) | 3 ejercicios |
 | H6 | **`miniaturas`**: 24 de 35 con 2 opciones; 1 `dibujo` con texto libre | 35 |
 | H7 | **`contexto` vacío**, aunque el enunciado depende de un escenario previo | ≈ 1,980 ejercicios |
-| H8 | **Texto "Pulsa Comprobar" sin botón** (`sinBoton: true`) | `clic-dato`, `miniaturas` |
+| H8 | **Texto "Pulsa Comprobar" en ejercicios con `sinBoton: true`** | ⚠️ **Por verificar en pantalla.** Coincide en el 100 % de `clic-dato` (59), `miniaturas` (35), `armagrafica` (16) y `filtros` (10): **120 ejercicios**. Ojo: `cloze` sí muestra un botón (captura "Falta 1 hueco") aunque `lab_mecanicas.con_boton` es `false`, así que ese campo **no** indica si hay botón visible. Basta abrir `ST-M1L1-02` para confirmarlo |
 | H9 | **Campos muertos o duplicados en `hoja`** | `cols` (524), `oculta` (524) |
 | H10 | **Nombres duplicados de efecto** (`rejilla`/`cuadricula`, `tresd`/`agregar_3d`, 5 de "color por barra") | 17 mandos |
 | H11 | **`gesto`**: 72 textos distintos, 909 vacíos | Todos |
 | H12 | **Lección 1 de Storytelling**: narrativa y datos incoherentes, y falta el ejercicio de quitar ruido | 5 |
+
+## 6.1 Cambios ya aplicados en la base (14-oct-2026)
+
+**Alcance:** 20 ejercicios modificados, y en 10 de ellos también su respuesta. Solo se tocaron `lab_ejercicios.dataset` (y `updated_at`) y, en `emparejar`, `lab_soluciones.solucion` y `.resultado`. No se tocó código, estructura de tablas ni otros ejercicios.
+
+| Grupo | Ejercicios | Qué se hizo |
+|---|---|---|
+| `emparejar` (10) | `ST-M2L1-06`, `ST-M2L2-04`, `ST-M2L6-05`, `ST-M8L4-07`, `ES-M8L3-04`, `ES-M4L3-07`, `ES-M1L2-05`, `ES-M1L3-05`, `ES-M6L7-04`, `ES-M8L2-04` | Parejas desempaquetadas a `[{a,b}]` (9 con 4 parejas, 1 con 3) y respuesta regenerada como `a=b\|a=b` |
+| Etiqueta partida (3) | `ES-M7L2-03`, `ST-M2L8-04`, `ES-M11L5-04` | Etiqueta reunida; el valor pasó a número |
+| Sufijo `:1` en la etiqueta (3) | `ST-M5L1-04`, `ST-M6L1-02`, `ST-M6L1-03` | `:1` retirado de la etiqueta; valor `[1]` |
+| Texto en el valor (2) | `ST-M8L1-02`, `ES-M9L1-04` | Etiqueta completa, valor `[1]` |
+| Mes en la etiqueta (1) | `ES-M10L4-02` | Cada opción ahora dice su mes ("Marzo: residuo grande…") |
+| Etiqueta y valor intercambiados (1) | `ST-M2L3-03` | `et` = cantidad (10 a 30), `vs` = precio (120 a 50). ⚠️ **Es una inferencia**; conviene verlo en pantalla |
+
+**Criterio para tarjetas tocables sin datos:** donde una opción no es una barra real (frases, ejes, leyendas), el valor se dejó en `[1]`, igual que las filas hermanas que ya lo traían. Es un marcador de posición, no un dato.
+
+**Verificación posterior:** las 59 soluciones de `clic-dato` siguen apuntando a una opción existente (58, más la "ninguna" intencional de `ST-M2L6-05`), y las filas con valor no numérico bajaron de 19 a 1.
+
+**Respaldo:** esquema privado `respaldo`, sin permisos para `anon` ni `authenticated` y con seguridad por filas activa (porque contiene respuestas). Tablas `respaldo.lab_ejercicios_20261014` y `respaldo.lab_soluciones_20261014`, con el estado **anterior** de los 20 ejercicios. Para revertir uno:
+
+```sql
+update public.lab_ejercicios e
+   set dataset = r.dataset, updated_at = now()
+  from respaldo.lab_ejercicios_20261014 r
+ where r.id = e.id and e.slug = 'ST-M2L1-06';          -- cambia el slug
+
+update public.lab_soluciones s
+   set solucion = r.solucion, resultado = r.resultado
+  from respaldo.lab_soluciones_20261014 r
+ where r.ejercicio_id = s.ejercicio_id;               -- solo si fue emparejar
+```
 
 ---
 
@@ -502,6 +537,10 @@ Es la lista de trabajo de la siguiente fase.
 5. **Familia nueva: Composición con zonas tocables** (diapositiva, dashboard, interfaz), para sacar de V2 lo que no es gráfica. ¿Se crea?
 6. **Móvil:** `taller`, `antesdespues` y `revisar` son solo web. ¿Se construye widget móvil o se usan variantes (`solo_movil` / `variante_de`)?
 7. **Qué es `contexto`** visualmente: ¿tarjeta sobre el enunciado? ¿Se pinta en todas las mecánicas o solo en `conmutador`? ⚠️ **verificar**.
+8. **`ST-M4L1-04` (pendiente):** la barra "Producto B (grande, color)" no tiene valor. Las demás valen 40, 42 y 38 y el enunciado dice que B es "más grande". **Propuesta: 60.** ¿Se acepta?
+9. **Ejercicios degenerados** (`ST-M6L1-02`, `ST-M6L1-03`, `ES-M9L1-04`): una sola opción tocable que siempre es la correcta. ¿Se les agregan distractores ahora (contenido) o esperan a la familia *Composición con zonas tocables*?
+10. **`ST-M2L3-03`:** confirmar en pantalla que `et` = cantidad y `vs` = precio es la lectura correcta de "precio vs. cantidad vendida".
+11. **Barras sin `clave` (H4):** son 13 filas, todas en la ruta de pruebas (`alpha-antesdespues`, `alpha-armagrafica`, `alpha-taller`). No se tocaron; sin urgencia.
 
 ---
 
