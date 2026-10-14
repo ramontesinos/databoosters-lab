@@ -178,6 +178,12 @@ Nacen de los errores que se encontraron en los datos. Un ejercicio que las incum
 
 **`roles` (5 valores, 5 estilos de celda a diseñar):** `contexto` (733) · `tocable` (237) · `texto` (184) · `numero` (78) · `destino` (77).
 
+**`celdasClave` (lista de celdas, opcional) · 14/10/2026, Raúl validando el módulo 1:** «¿no se debería pintar lo correcto, para ver el porqué?». Son las celdas que **explican la respuesta**. Al corregir, **acierte o falle**, la mecánica las marca en la hoja: si acierta, se ve por qué es cierto; si falla, se ve dónde estaba la respuesta. Ejemplo: en st01-cloze-02 la respuesta es «dos sucursales redujeron su horario» y `celdasClave` es `["B1","C1","B3","C3"]`, las horas de Norte y Centro, de 60 a 40 y de 70 a 45.
+- En el JSON de `_lab/` se escribe `hoja.celdas_clave`; `_verificar_json.py` reprueba si una celda no existe en la hoja.
+- **Para el sitio:** `XaHoja` ya tiene `marcas` (`bien`/`mal`) y `corregido`. Falta que cada mecánica con hoja pase `celdasClave` como marcas cuando `corregido` sea verdadero. Lo pide un estado de celda «clave», que es distinto de «la que tocaste»: en un `clic-celda` la celda tocada ya se marca bien o mal, y las clave son las que lo explican.
+- Hoy lo traen 19 ejercicios de Storytelling (módulos 1 a 5); los módulos 6 a 9 lo traerán desde que se carguen.
+
+
 **`enfasis.parte` (5 valores):** `barra_estado` · `barra_formulas` · `cinta` · `reja` · `pestanas`.
 
 **Estados a diseñar:** celda en reposo, tocable, seleccionada, correcta, incorrecta, "destino" (donde va el resultado), fila pintada.
