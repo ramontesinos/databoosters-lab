@@ -771,3 +771,9 @@ El módulo 3 (`03-eliminar-el-ruido-visual/`, 25 ejercicios, cargado el 14/10/20
 - `lineas_encimadas` como `dibujo` (st03-miniaturas-01).
 
 **Cargador, 14/10/2026:** `resaltar` y `estilo` ahora llegan a la base, en `clic-dato` y en `vistas[].grafica`. Antes se perdían al cargar: la vista «Una resaltada» del módulo 2 (st02-conmutador-01) quedó sin resaltado, y ya se corrigió en la base.
+
+El módulo 4 (`04-dirigir-la-atencion/`, 29 ejercicios, cargado el 14/10/2026) usa:
+- `resaltar` en dos `clic-dato` (st04-clic-dato-01) y en una vista (st04-conmutador-01, «Un solo color»).
+- `arcoiris` + `opcionNinguna` en st04-clic-dato-02: un color por barra y la respuesta es «No se puede saber».
+- `tipo: linea` con 3 series en un `clic-dato` (st04-clic-dato-03): se toca un **año** (el punto de la categoría), no una línea.
+- En las vistas, `estilo.paleta` (`rojo_verde` y `daltonica`, st04-conmutador-02) y `estilo.sombrear_lider` (st04-conmutador-03). Las dos esperan a §9.2 y §9.5: hasta que el sitio las dibuje, las dos vistas se ven iguales.
